@@ -15,6 +15,9 @@ function parseWindow(window: string): number {
   }
 
   const value = Number.parseInt(match[1]!, 10)
+  if (value === 0) {
+    throw new Error(`Invalid window format: "${window}". Window must be greater than 0`)
+  }
   const unit = match[2]!
 
   const multipliers: Record<string, number> = {
@@ -48,6 +51,9 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
   const store: RateLimitStore = { entries: new Map() }
   let externalStore: StorageAdapter | undefined
 
+  if (config.store === 'redis') {
+    throw new Error('[ai-armor] store: "redis" requires passing a StorageAdapter instance. See docs for setup.')
+  }
   if (config.store && typeof config.store === 'object') {
     externalStore = config.store
   }
@@ -59,7 +65,9 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
   async function getEntries(key: string): Promise<WindowEntry[]> {
     if (externalStore) {
       const data = await externalStore.getItem(key)
-      return (data as WindowEntry[]) ?? []
+      if (!Array.isArray(data))
+        return []
+      return data as WindowEntry[]
     }
     return store.entries.get(key) ?? []
   }
@@ -100,12 +108,12 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
         const oldestInWindow = entries[0]!.timestamp
         const resetAt = oldestInWindow + windowMs
 
+        // Persist pruned entries BEFORE firing callback (so external stores are consistent)
+        await setEntries(storeKey, entries)
+
         if (config.onLimited) {
           config.onLimited(ctx)
         }
-
-        // Persist pruned entries (cleanup expired) but do NOT add new entry
-        await setEntries(storeKey, entries)
 
         return {
           allowed: false,

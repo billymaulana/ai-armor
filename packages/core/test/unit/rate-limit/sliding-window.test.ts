@@ -24,6 +24,11 @@ describe('parseWindow', () => {
     expect(() => parseWindow('1x')).toThrow('Invalid window format')
     expect(() => parseWindow('')).toThrow('Invalid window format')
   })
+
+  it('should throw on zero window', () => {
+    expect(() => parseWindow('0s')).toThrow('must be greater than 0')
+    expect(() => parseWindow('0m')).toThrow('must be greater than 0')
+  })
 })
 
 describe('createSlidingWindowLimiter', () => {
@@ -186,5 +191,13 @@ describe('createSlidingWindowLimiter', () => {
 
     const result = await limiter.check(ctx)
     expect(result.resetAt).toBeGreaterThan(Date.now())
+  })
+
+  it('should throw when store is "redis" without adapter', () => {
+    expect(() => createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'user', limit: 1, window: '1m' }],
+      store: 'redis',
+    })).toThrow('requires passing a StorageAdapter')
   })
 })

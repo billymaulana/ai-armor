@@ -58,10 +58,14 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
       }
       // Fire onWarned callback when budget is exceeded with 'warn' action
       if (result.action === 'warn' && config.budget?.onWarned) {
-        config.budget.onWarned(ctx, {
+        const budgetInfo: { daily: number, monthly: number, perUserDaily?: number } = {
           daily: result.currentDaily,
           monthly: result.currentMonthly,
-        })
+        }
+        if (result.perUserDaily !== undefined) {
+          budgetInfo.perUserDaily = result.perUserDaily
+        }
+        config.budget.onWarned(ctx, budgetInfo)
       }
       return out
     },

@@ -90,13 +90,39 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
         return cached
       }
 
-      const result = await doGenerate() as Record<string, unknown>
-      const latency = Date.now() - startTime
+      const model = request?.model ?? ''
+      let result: Record<string, unknown>
 
+      try {
+        result = await doGenerate() as Record<string, unknown>
+      }
+      catch (err) {
+        // Log failed requests for observability
+        const failLog: ArmorLog = {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          model,
+          provider: getProvider(model),
+          inputTokens: 0,
+          outputTokens: 0,
+          cost: 0,
+          latency: Date.now() - startTime,
+          cached: false,
+          fallback: false,
+          rateLimited: false,
+          blocked: String(err),
+        }
+        if (context.userId !== undefined) {
+          failLog.userId = context.userId
+        }
+        await armor.log(failLog)
+        throw err
+      }
+
+      const latency = Date.now() - startTime
       const usage = result.usage as { promptTokens?: number, completionTokens?: number } | undefined
       const inputTokens = usage?.promptTokens ?? 0
       const outputTokens = usage?.completionTokens ?? 0
-      const model = request?.model ?? ''
 
       // Track cost
       await armor.trackCost(model, inputTokens, outputTokens, context.userId)

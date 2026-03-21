@@ -17,6 +17,7 @@ export interface BudgetCheckResult {
   action: 'block' | 'warn' | 'downgrade-model' | 'pass'
   currentDaily: number
   currentMonthly: number
+  perUserDaily?: number
   suggestedModel?: string
 }
 
@@ -34,6 +35,9 @@ export function createCostTracker(config: BudgetConfig) {
   const memoryStore: CostStore = { entries: [] }
   let externalStore: StorageAdapter | undefined
 
+  if (config.store === 'redis') {
+    throw new Error('[ai-armor] store: "redis" requires passing a StorageAdapter instance. See docs for setup.')
+  }
   if (config.store && typeof config.store === 'object') {
     externalStore = config.store
   }
@@ -41,7 +45,9 @@ export function createCostTracker(config: BudgetConfig) {
   async function getEntries(): Promise<CostEntry[]> {
     if (externalStore) {
       const data = await externalStore.getItem('cost-entries')
-      return (data as CostEntry[]) ?? []
+      if (!Array.isArray(data))
+        return []
+      return data as CostEntry[]
     }
     return memoryStore.entries
   }
@@ -150,6 +156,7 @@ export function createCostTracker(config: BudgetConfig) {
           action: 'downgrade-model',
           currentDaily: dailyCost,
           currentMonthly: monthlyCost,
+          perUserDaily: userDailyCost,
           suggestedModel: config.downgradeMap[model],
         }
       }
@@ -158,6 +165,7 @@ export function createCostTracker(config: BudgetConfig) {
         action: config.onExceeded,
         currentDaily: dailyCost,
         currentMonthly: monthlyCost,
+        perUserDaily: userDailyCost,
       }
     }
 

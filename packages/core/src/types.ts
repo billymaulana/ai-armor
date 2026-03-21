@@ -19,7 +19,7 @@ export interface BudgetConfig {
   onExceeded: 'block' | 'warn' | 'downgrade-model'
   downgradeMap?: Record<string, string>
   store?: 'memory' | 'redis' | StorageAdapter
-  onWarned?: (ctx: ArmorContext, budget: { daily: number, monthly: number }) => void
+  onWarned?: (ctx: ArmorContext, budget: { daily: number, monthly: number, perUserDaily?: number }) => void
 }
 
 export interface FallbackConfig {

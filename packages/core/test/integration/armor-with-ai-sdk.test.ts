@@ -138,4 +138,30 @@ describe('aiArmorMiddleware', () => {
     expect(logs[0]!.cached).toBe(false)
     expect(logs[0]!.userId).toBe('test-user')
   })
+
+  it('should log and rethrow when doGenerate throws', async () => {
+    const armor = createArmor({
+      logging: {
+        enabled: true,
+        include: ['model', 'latency'],
+      },
+    })
+
+    const middleware = aiArmorMiddleware(armor, { userId: 'test-user' })
+    const transformed = await middleware.transformParams({
+      params: { model: 'gpt-4o', messages: [] },
+    })
+
+    await expect(
+      middleware.wrapGenerate({
+        doGenerate: async () => { throw new Error('API timeout') },
+        params: transformed,
+      }),
+    ).rejects.toThrow('API timeout')
+
+    const logs = armor.getLogs()
+    expect(logs).toHaveLength(1)
+    expect(logs[0]!.blocked).toBe('Error: API timeout')
+    expect(logs[0]!.cost).toBe(0)
+  })
 })
