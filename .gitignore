@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.output/
+.nuxt/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Claude Code / AI artifacts (NEVER commit)
+CLAUDE.md
+.claude/
+.planning/
+PLAN.md
+RESEARCH.md
+VERIFICATION.md
+SUMMARY.md
+*-analysis.md
+*-report.md
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Changesets temp
+.changeset/*.md
+!.changeset/config.json
+!.changeset/README.md
+
+# Turbo
+.turbo/

@@ -1,0 +1,71 @@
+{
+  "name": "ai-armor",
+  "version": "0.1.0",
+  "description": "Production AI toolkit for TypeScript -- rate limiting, cost tracking, fallback, caching, safety",
+  "license": "MIT",
+  "author": "billymaulana",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/billymaulana/ai-armor",
+    "directory": "packages/core"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./ai-sdk": {
+      "import": "./dist/ai-sdk.mjs",
+      "types": "./dist/ai-sdk.d.ts"
+    },
+    "./http": {
+      "import": "./dist/http.mjs",
+      "types": "./dist/http.d.ts"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "ai",
+    "llm",
+    "rate-limiting",
+    "cost-tracking",
+    "fallback",
+    "caching",
+    "safety",
+    "guardrails",
+    "production",
+    "typescript",
+    "openai",
+    "anthropic",
+    "gemini",
+    "ai-sdk",
+    "middleware"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch"
+  },
+  "peerDependencies": {
+    "ai": ">=6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ai": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "gpt-tokenizer": "^2.8.1",
+    "unstorage": "^1.14.4"
+  },
+  "devDependencies": {
+    "ai": "^6.0.0",
+    "@ai-sdk/openai": "^3.0.0"
+  }
+}

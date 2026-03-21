@@ -1,0 +1,8 @@
+{
+  "name": "ai-armor-playground",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ai-armor": "workspace:*"
+  }
+}
