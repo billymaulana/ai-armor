@@ -46,14 +46,17 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
 
     async checkBudget(model: string, ctx: ArmorContext) {
       if (!costTracker) {
-        return { allowed: true, action: 'pass' }
+        return { allowed: true as const, action: 'pass' as const }
       }
       const result = await costTracker.checkBudget(model, ctx)
-      return {
+      const out: { allowed: boolean, action: string, suggestedModel?: string | undefined } = {
         allowed: result.allowed,
         action: result.action,
-        suggestedModel: result.suggestedModel,
       }
+      if (result.suggestedModel !== undefined) {
+        out.suggestedModel = result.suggestedModel
+      }
+      return out
     },
 
     resolveModel(model: string): string {
@@ -64,7 +67,8 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
     },
 
     getCachedResponse(request: ArmorRequest): unknown | undefined {
-      if (!cache) return undefined
+      if (!cache)
+        return undefined
       return cache.get(request)
     },
 

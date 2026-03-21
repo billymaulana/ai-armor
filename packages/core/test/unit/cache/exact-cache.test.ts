@@ -1,6 +1,6 @@
+import type { ArmorRequest } from '../../../src/types'
 import { describe, expect, it, vi } from 'vitest'
 import { createExactCache } from '../../../src/cache/exact-cache'
-import type { ArmorRequest } from '../../../src/types'
 
 function makeRequest(model: string, messages: unknown[] = [{ role: 'user', content: 'hello' }]): ArmorRequest {
   return { model, messages }
@@ -112,7 +112,7 @@ describe('createExactCache', () => {
       strategy: 'exact',
       ttl: 3600,
       driver: 'memory',
-      keyFn: (req) => `custom:${req.model}`,
+      keyFn: req => `custom:${req.model}`,
     })
 
     const req1 = makeRequest('gpt-4o', [{ content: 'hello' }])

@@ -1,6 +1,6 @@
+import type { ArmorLog } from '../../../src/types'
 import { describe, expect, it, vi } from 'vitest'
 import { createLogger } from '../../../src/logging/logger'
-import type { ArmorLog } from '../../../src/types'
 
 function makeLog(overrides?: Partial<ArmorLog>): ArmorLog {
   return {

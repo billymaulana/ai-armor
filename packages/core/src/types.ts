@@ -108,7 +108,7 @@ export interface ArmorInstance {
   config: ArmorConfig
   checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
   trackCost: (model: string, inputTokens: number, outputTokens: number, userId?: string) => Promise<void>
-  checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string }>
+  checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string | undefined }>
   resolveModel: (model: string) => string
   getCachedResponse: (request: ArmorRequest) => unknown | undefined
   setCachedResponse: (request: ArmorRequest, response: unknown) => void

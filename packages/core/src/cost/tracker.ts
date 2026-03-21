@@ -5,7 +5,7 @@ interface CostEntry {
   timestamp: number
   model: string
   cost: number
-  userId?: string
+  userId?: string | undefined
 }
 
 interface CostStore {

@@ -1,7 +1,7 @@
 {
   "name": "ai-armor-playground",
-  "private": true,
   "type": "module",
+  "private": true,
   "dependencies": {
     "ai-armor": "workspace:*"
   }

@@ -30,7 +30,8 @@ export function createLogger(config: LoggingConfig) {
           filtered.latency = log.latency
           break
         case 'userId':
-          filtered.userId = log.userId
+          if (log.userId !== undefined)
+            filtered.userId = log.userId
           break
         case 'cached':
           filtered.cached = log.cached
@@ -45,7 +46,8 @@ export function createLogger(config: LoggingConfig) {
   }
 
   async function log(entry: ArmorLog): Promise<void> {
-    if (!config.enabled) return
+    if (!config.enabled)
+      return
 
     logs.push(entry)
 

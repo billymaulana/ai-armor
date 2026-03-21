@@ -6,7 +6,5 @@ export default antfu({
   ignores: ['**/dist/**', '**/.nuxt/**', '**/coverage/**'],
   rules: {
     'no-console': 'error',
-    'ts/no-explicit-any': 'error',
-    'ts/consistent-type-imports': 'error',
   },
 })

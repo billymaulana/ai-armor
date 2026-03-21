@@ -7,8 +7,8 @@
 export interface ModelPricing {
   model: string
   provider: string
-  input: number   // USD per 1M input tokens
-  output: number  // USD per 1M output tokens
+  input: number // USD per 1M input tokens
+  output: number // USD per 1M output tokens
 }
 
 export const pricingDatabase: ModelPricing[] = [

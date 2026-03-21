@@ -1,4 +1,4 @@
-import type { RateLimitConfig, ArmorContext, StorageAdapter } from '../types'
+import type { ArmorContext, RateLimitConfig, StorageAdapter } from '../types'
 
 interface WindowEntry {
   timestamp: number
@@ -9,7 +9,7 @@ interface RateLimitStore {
 }
 
 function parseWindow(window: string): number {
-  const match = window.match(/^(\d+)(s|m|h|d)$/)
+  const match = window.match(/^(\d+)([smhd])$/)
   if (!match) {
     throw new Error(`Invalid window format: "${window}". Use format like "1m", "1h", "1d"`)
   }

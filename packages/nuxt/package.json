@@ -1,19 +1,19 @@
 {
   "name": "@ai-armor/nuxt",
+  "type": "module",
   "version": "0.1.0",
   "description": "Nuxt module for ai-armor -- production AI toolkit",
-  "license": "MIT",
   "author": "billymaulana",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/billymaulana/ai-armor",
     "directory": "packages/nuxt"
   },
-  "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/module.mjs",
-      "types": "./dist/types.d.ts"
+      "types": "./dist/types.d.ts",
+      "import": "./dist/module.mjs"
     }
   },
   "main": "./dist/module.mjs",
@@ -28,8 +28,8 @@
     "prepack": "nuxt-module-build build"
   },
   "dependencies": {
-    "ai-armor": "workspace:*",
-    "@nuxt/kit": "^3.16.0"
+    "@nuxt/kit": "^3.16.0",
+    "ai-armor": "workspace:*"
   },
   "devDependencies": {
     "@nuxt/module-builder": "^0.8.4",

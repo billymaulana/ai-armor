@@ -1,4 +1,4 @@
-import type { ArmorInstance, ArmorContext, ArmorLog } from '../types'
+import type { ArmorContext, ArmorInstance, ArmorLog, ArmorRequest } from '../types'
 import { getProvider } from '../pricing/database'
 
 /**
@@ -38,17 +38,20 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
       // If budget suggests model downgrade, apply it
       const finalModel = budgetResult.suggestedModel ?? resolvedModel
 
-      // Check cache
-      const request = {
+      // Build request for cache lookup
+      const request: ArmorRequest = {
         model: finalModel,
         messages: (params.messages as unknown[]) ?? [],
-        temperature: params.temperature as number | undefined,
-        tools: params.tools as unknown[] | undefined,
+      }
+      if (params.temperature !== undefined) {
+        request.temperature = params.temperature as number
+      }
+      if (params.tools !== undefined) {
+        request.tools = params.tools as unknown[]
       }
 
       const cached = armor.getCachedResponse(request)
       if (cached) {
-        // Store a marker so wrapGenerate knows to return cached result
         return {
           ...params,
           _armorCached: cached,
@@ -66,11 +69,10 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
 
     wrapGenerate: async ({ doGenerate, params }: { doGenerate: () => Promise<unknown>, params: Record<string, unknown> }) => {
       const startTime = Date.now()
-      const request = params._armorRequest as { model: string, messages: unknown[] } | undefined
+      const request = params._armorRequest as ArmorRequest | undefined
       const cached = params._armorCached as unknown | undefined
 
       if (cached) {
-        // Return cached response
         const logEntry: ArmorLog = {
           id: crypto.randomUUID(),
           timestamp: Date.now(),
@@ -116,8 +118,10 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
         latency,
         cached: false,
         fallback: false,
-        userId: context.userId,
         rateLimited: false,
+      }
+      if (context.userId !== undefined) {
+        logEntry.userId = context.userId
       }
       await armor.log(logEntry)
 

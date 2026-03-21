@@ -57,9 +57,9 @@ const armor = createArmor({
 ### With Vercel AI SDK
 
 ```ts
-import { aiArmorMiddleware } from 'ai-armor/ai-sdk'
-import { wrapLanguageModel } from 'ai'
 import { openai } from '@ai-sdk/openai'
+import { wrapLanguageModel } from 'ai'
+import { aiArmorMiddleware } from 'ai-armor/ai-sdk'
 
 const protectedModel = wrapLanguageModel({
   model: openai('gpt-4o'),
