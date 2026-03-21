@@ -125,7 +125,7 @@ describe('createSlidingWindowLimiter', () => {
     const limiter = createSlidingWindowLimiter({
       strategy: 'sliding-window',
       rules: [{ key: 'user', limit: 1, window: '1m' }],
-      keyResolver: ctx => ctx.headers?.['x-api-key'] as string ?? 'default',
+      keyResolver: (ctx, _ruleKey) => ctx.headers?.['x-api-key'] as string ?? 'default',
     })
 
     const r1 = await limiter.check({ headers: { 'x-api-key': 'key-1' } })

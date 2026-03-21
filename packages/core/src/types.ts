@@ -2,7 +2,7 @@ export interface RateLimitConfig {
   strategy: 'sliding-window' | 'fixed-window' | 'token-bucket'
   rules: RateLimitRule[]
   store?: 'memory' | 'redis' | StorageAdapter
-  keyResolver?: (ctx: ArmorContext) => string
+  keyResolver?: (ctx: ArmorContext, ruleKey: string) => string
   onLimited?: (ctx: ArmorContext) => void
 }
 
@@ -19,6 +19,7 @@ export interface BudgetConfig {
   onExceeded: 'block' | 'warn' | 'downgrade-model'
   downgradeMap?: Record<string, string>
   store?: 'memory' | 'redis' | StorageAdapter
+  onWarned?: (ctx: ArmorContext, budget: { daily: number, monthly: number }) => void
 }
 
 export interface FallbackConfig {
@@ -54,6 +55,7 @@ export interface LoggingConfig {
   enabled: boolean
   include: Array<'model' | 'tokens' | 'cost' | 'latency' | 'userId' | 'cached' | 'fallback'>
   onRequest?: (log: ArmorLog) => void | Promise<void>
+  maxEntries?: number
 }
 
 export interface ArmorConfig {

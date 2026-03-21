@@ -56,6 +56,13 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
       if (result.suggestedModel !== undefined) {
         out.suggestedModel = result.suggestedModel
       }
+      // Fire onWarned callback when budget is exceeded with 'warn' action
+      if (result.action === 'warn' && config.budget?.onWarned) {
+        config.budget.onWarned(ctx, {
+          daily: result.currentDaily,
+          monthly: result.currentMonthly,
+        })
+      }
       return out
     },
 

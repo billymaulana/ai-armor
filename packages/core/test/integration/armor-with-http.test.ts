@@ -164,7 +164,7 @@ describe('createArmorHandler', () => {
       rateLimit: {
         strategy: 'sliding-window',
         rules: [{ key: 'user', limit: 1, window: '1m' }],
-        keyResolver: ctx => ctx.userId ?? 'anon',
+        keyResolver: (ctx, _ruleKey) => ctx.userId ?? 'anon',
       },
     })
 

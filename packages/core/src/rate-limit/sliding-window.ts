@@ -29,7 +29,7 @@ function parseWindow(window: string): number {
 
 function resolveKey(config: RateLimitConfig, ctx: ArmorContext, ruleKey: string): string {
   if (config.keyResolver) {
-    return config.keyResolver(ctx)
+    return config.keyResolver(ctx, ruleKey)
   }
 
   switch (ruleKey) {
@@ -75,6 +75,15 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
   async function check(ctx: ArmorContext): Promise<{ allowed: boolean, remaining: number, resetAt: number }> {
     const now = Date.now()
 
+    // Phase 1: Read-only check -- evaluate ALL rules before mutating any state
+    // This prevents partial state mutation when an inner rule blocks
+    const ruleSnapshots: Array<{
+      storeKey: string
+      entries: WindowEntry[]
+      windowMs: number
+      limit: number
+    }> = []
+
     for (const rule of config.rules) {
       const resolvedKey = resolveKey(config, ctx, rule.key)
       const storeKey = getStoreKey(rule.key, resolvedKey)
@@ -83,11 +92,11 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
 
       let entries = await getEntries(storeKey)
 
-      // Remove expired entries (outside the window)
+      // Remove expired entries
       entries = entries.filter(e => e.timestamp > windowStart)
 
+      // Check if this rule blocks
       if (entries.length >= rule.limit) {
-        // Rate limited
         const oldestInWindow = entries[0]!.timestamp
         const resetAt = oldestInWindow + windowMs
 
@@ -95,6 +104,7 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
           config.onLimited(ctx)
         }
 
+        // Persist pruned entries (cleanup expired) but do NOT add new entry
         await setEntries(storeKey, entries)
 
         return {
@@ -104,25 +114,24 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
         }
       }
 
-      // Add new entry
-      entries.push({ timestamp: now })
-      await setEntries(storeKey, entries)
+      ruleSnapshots.push({ storeKey, entries, windowMs, limit: rule.limit })
+    }
+
+    // Phase 2: All rules passed -- atomically add entry to all rules
+    for (const snapshot of ruleSnapshots) {
+      snapshot.entries.push({ timestamp: now })
+      await setEntries(snapshot.storeKey, snapshot.entries)
     }
 
     // Calculate remaining from the most restrictive rule
     let minRemaining = Number.POSITIVE_INFINITY
     let earliestReset = 0
 
-    for (const rule of config.rules) {
-      const resolvedKey = resolveKey(config, ctx, rule.key)
-      const storeKey = getStoreKey(rule.key, resolvedKey)
-      const windowMs = parseWindow(rule.window)
-      const entries = await getEntries(storeKey)
-      const remaining = rule.limit - entries.length
-
+    for (const snapshot of ruleSnapshots) {
+      const remaining = snapshot.limit - snapshot.entries.length
       if (remaining < minRemaining) {
         minRemaining = remaining
-        earliestReset = now + windowMs
+        earliestReset = now + snapshot.windowMs
       }
     }
 

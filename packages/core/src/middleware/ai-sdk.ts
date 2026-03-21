@@ -101,8 +101,9 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
       // Track cost
       await armor.trackCost(model, inputTokens, outputTokens, context.userId)
 
-      // Cache the response
-      if (request) {
+      // Cache the response -- only cache successful results
+      const finishReason = result.finishReason as string | undefined
+      if (request && finishReason !== 'error') {
         armor.setCachedResponse(request, result)
       }
 

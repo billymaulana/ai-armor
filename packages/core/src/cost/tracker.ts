@@ -54,16 +54,29 @@ export function createCostTracker(config: BudgetConfig) {
     memoryStore.entries = entries
   }
 
+  function pruneOldEntries(entries: CostEntry[]): CostEntry[] {
+    // Keep entries from the last 32 days (covers monthly window + 1 day buffer)
+    const cutoff = Date.now() - (32 * 24 * 60 * 60 * 1000)
+    return entries.filter(e => e.timestamp > cutoff)
+  }
+
   async function trackUsage(model: string, inputTokens: number, outputTokens: number, userId?: string): Promise<void> {
     const cost = calculateCost(model, inputTokens, outputTokens)
-    const entries = await getEntries()
+    let entries = await getEntries()
 
-    entries.push({
+    // Prune entries older than 32 days to prevent unbounded memory growth
+    entries = pruneOldEntries(entries)
+
+    const entry: CostEntry = {
       timestamp: Date.now(),
       model,
       cost,
-      userId,
-    })
+    }
+    if (userId !== undefined) {
+      entry.userId = userId
+    }
+
+    entries.push(entry)
 
     await setEntries(entries)
   }

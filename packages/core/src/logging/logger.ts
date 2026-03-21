@@ -51,6 +51,12 @@ export function createLogger(config: LoggingConfig) {
 
     logs.push(entry)
 
+    // Prevent unbounded memory growth -- keep only most recent N entries
+    const maxEntries = config.maxEntries ?? 10000
+    if (logs.length > maxEntries) {
+      logs.splice(0, logs.length - maxEntries)
+    }
+
     if (config.onRequest) {
       await config.onRequest(entry)
     }

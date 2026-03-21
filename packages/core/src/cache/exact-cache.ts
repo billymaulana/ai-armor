@@ -1,40 +1,34 @@
 import type { ArmorRequest, CacheConfig } from '../types'
 
 interface CacheEntry {
-  key: string
   value: unknown
+  serializedKey: string
   expiresAt: number
-  createdAt: number
 }
 
+/**
+ * O(1) LRU exact-match cache using Map insertion-order trick.
+ * Map preserves insertion order -- delete+reinsert moves to end.
+ * First entry is always the LRU candidate.
+ */
 export function createExactCache(config: CacheConfig) {
   const cache = new Map<string, CacheEntry>()
-  const accessOrder: string[] = []
+
+  function serializeRequest(request: ArmorRequest): string {
+    return JSON.stringify({
+      m: request.model,
+      msg: request.messages,
+      t: request.temperature,
+      tools: request.tools,
+    })
+  }
 
   function generateKey(request: ArmorRequest): string {
     if (config.keyFn) {
       return config.keyFn(request)
     }
-
-    const keyData = {
-      model: request.model,
-      messages: request.messages,
-      temperature: request.temperature,
-      tools: request.tools,
-    }
-
-    return hashObject(keyData)
-  }
-
-  function hashObject(obj: unknown): string {
-    const str = JSON.stringify(obj, Object.keys(obj as Record<string, unknown>).sort())
-    let hash = 0
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash |= 0
-    }
-    return `cache:${hash.toString(36)}`
+    // Use full serialized string as key to avoid hash collisions
+    return serializeRequest(request)
   }
 
   function evictExpired(): void {
@@ -42,9 +36,6 @@ export function createExactCache(config: CacheConfig) {
     for (const [key, entry] of cache) {
       if (entry.expiresAt <= now) {
         cache.delete(key)
-        const idx = accessOrder.indexOf(key)
-        if (idx !== -1)
-          accessOrder.splice(idx, 1)
       }
     }
   }
@@ -53,18 +44,19 @@ export function createExactCache(config: CacheConfig) {
     if (!config.maxSize || cache.size <= config.maxSize)
       return
 
-    while (cache.size > config.maxSize && accessOrder.length > 0) {
-      const oldest = accessOrder.shift()
-      if (oldest)
-        cache.delete(oldest)
+    // Map iteration order = insertion order, first = oldest (LRU)
+    const iterator = cache.keys()
+    while (cache.size > config.maxSize) {
+      const oldest = iterator.next()
+      if (oldest.done)
+        break
+      cache.delete(oldest.value)
     }
   }
 
   function get(request: ArmorRequest): unknown | undefined {
     if (!config.enabled)
       return undefined
-
-    evictExpired()
 
     const key = generateKey(request)
     const entry = cache.get(key)
@@ -74,17 +66,12 @@ export function createExactCache(config: CacheConfig) {
 
     if (entry.expiresAt <= Date.now()) {
       cache.delete(key)
-      const idx = accessOrder.indexOf(key)
-      if (idx !== -1)
-        accessOrder.splice(idx, 1)
       return undefined
     }
 
-    // Move to end (most recently used)
-    const idx = accessOrder.indexOf(key)
-    if (idx !== -1)
-      accessOrder.splice(idx, 1)
-    accessOrder.push(key)
+    // O(1) move-to-end: delete and re-insert preserves Map order
+    cache.delete(key)
+    cache.set(key, entry)
 
     return entry.value
   }
@@ -94,19 +81,15 @@ export function createExactCache(config: CacheConfig) {
       return
 
     const key = generateKey(request)
-    const now = Date.now()
+
+    // Delete first to ensure re-insert moves to end
+    cache.delete(key)
 
     cache.set(key, {
-      key,
       value,
-      expiresAt: now + (config.ttl * 1000),
-      createdAt: now,
+      serializedKey: key,
+      expiresAt: Date.now() + (config.ttl * 1000),
     })
-
-    const idx = accessOrder.indexOf(key)
-    if (idx !== -1)
-      accessOrder.splice(idx, 1)
-    accessOrder.push(key)
 
     evictLRU()
   }
@@ -122,7 +105,6 @@ export function createExactCache(config: CacheConfig) {
 
   function clear(): void {
     cache.clear()
-    accessOrder.length = 0
   }
 
   return {
