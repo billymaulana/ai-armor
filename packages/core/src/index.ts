@@ -1,17 +1,25 @@
+// Main entry
 export { createArmor } from './create-armor'
+
+// Types
 export type {
   ArmorConfig,
-  ArmorInstance,
   ArmorContext,
+  ArmorInstance,
   ArmorLog,
   ArmorRequest,
-} from './types'
-export type {
-  RateLimitConfig,
   BudgetConfig,
-  FallbackConfig,
   CacheConfig,
+  FallbackConfig,
+  LoggingConfig,
+  RateLimitConfig,
+  RateLimitResult,
+  RateLimitRule,
   RoutingConfig,
   SafetyConfig,
-  LoggingConfig,
+  StorageAdapter,
 } from './types'
+
+// Pricing utilities
+export { calculateCost, getAllModels, getModelPricing, getProvider } from './pricing'
+export type { ModelPricing } from './pricing'

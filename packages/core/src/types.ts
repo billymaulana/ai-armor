@@ -98,11 +98,23 @@ export interface ArmorLog {
   rateLimited: boolean
 }
 
+export interface RateLimitResult {
+  allowed: boolean
+  remaining: number
+  resetAt: number
+}
+
 export interface ArmorInstance {
   config: ArmorConfig
-  checkRateLimit: (ctx: ArmorContext) => Promise<boolean>
-  trackCost: (log: ArmorLog) => Promise<void>
+  checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
+  trackCost: (model: string, inputTokens: number, outputTokens: number, userId?: string) => Promise<void>
+  checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string }>
   resolveModel: (model: string) => string
+  getCachedResponse: (request: ArmorRequest) => unknown | undefined
+  setCachedResponse: (request: ArmorRequest, response: unknown) => void
+  log: (entry: ArmorLog) => Promise<void>
+  getLogs: () => ArmorLog[]
+  estimateCost: (model: string, inputTokens: number, outputTokens: number) => number
 }
 
 export interface StorageAdapter {

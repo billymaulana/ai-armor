@@ -1,0 +1,1 @@
+export { createModelResolver } from './resolver'
