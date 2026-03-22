@@ -48,6 +48,11 @@ function resolveKey(config: RateLimitConfig, ctx: ArmorContext, ruleKey: string)
 }
 
 export function createSlidingWindowLimiter(config: RateLimitConfig) {
+  // Validate all rules eagerly at construction time (fail-fast)
+  for (const rule of config.rules) {
+    parseWindow(rule.window)
+  }
+
   const store: RateLimitStore = { entries: new Map() }
   let externalStore: StorageAdapter | undefined
 
