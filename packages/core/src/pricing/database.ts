@@ -24,10 +24,14 @@ export const pricingDatabase: ModelPricing[] = [
   { model: 'o1-pro', provider: 'openai', input: 150.00, output: 600.00 },
   { model: 'o3-mini', provider: 'openai', input: 1.10, output: 4.40 },
 
-  // Anthropic
+  // Anthropic -- short aliases
   { model: 'claude-opus-4-6', provider: 'anthropic', input: 15.00, output: 75.00 },
   { model: 'claude-sonnet-4-6', provider: 'anthropic', input: 3.00, output: 15.00 },
   { model: 'claude-haiku-4-5', provider: 'anthropic', input: 0.80, output: 4.00 },
+  // Anthropic -- dated versions (used by API)
+  { model: 'claude-opus-4-20250514', provider: 'anthropic', input: 15.00, output: 75.00 },
+  { model: 'claude-sonnet-4-20250514', provider: 'anthropic', input: 3.00, output: 15.00 },
+  { model: 'claude-haiku-4-5-20251001', provider: 'anthropic', input: 0.80, output: 4.00 },
   { model: 'claude-3-5-sonnet-20241022', provider: 'anthropic', input: 3.00, output: 15.00 },
   { model: 'claude-3-5-haiku-20241022', provider: 'anthropic', input: 0.80, output: 4.00 },
   { model: 'claude-3-opus-20240229', provider: 'anthropic', input: 15.00, output: 75.00 },
