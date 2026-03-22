@@ -1,13 +1,28 @@
-import { addImports, createResolver, defineNuxtModule } from '@nuxt/kit'
+import type {
+  BudgetConfig,
+  CacheConfig,
+  FallbackConfig,
+  LoggingConfig,
+  RateLimitConfig,
+  RoutingConfig,
+  SafetyConfig,
+} from 'ai-armor'
+import { addImports, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 
 export interface ModuleOptions {
-  rateLimit?: Record<string, unknown>
-  budget?: Record<string, unknown>
-  fallback?: Record<string, unknown>
-  cache?: Record<string, unknown>
-  routing?: Record<string, unknown>
-  safety?: Record<string, unknown>
-  logging?: Record<string, unknown>
+  rateLimit?: RateLimitConfig
+  budget?: BudgetConfig
+  fallback?: FallbackConfig
+  cache?: CacheConfig
+  routing?: RoutingConfig
+  safety?: SafetyConfig
+  logging?: LoggingConfig
+  adminSecret?: string
+}
+
+function toSerializable(obj: unknown): Record<string, unknown> {
+  // JSON round-trip strips functions, RegExps, undefined -- safe for runtimeConfig
+  return JSON.parse(JSON.stringify(obj ?? {}))
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -19,8 +34,15 @@ export default defineNuxtModule<ModuleOptions>({
     },
   },
   defaults: {},
-  setup(_options, _nuxt) {
+  setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
+
+    // Pass only serializable config to runtime (strips functions, RegExp, StorageAdapter)
+    // For advanced config with callbacks/adapters, use a server plugin to call initArmor() directly.
+    nuxt.options.runtimeConfig.aiArmor = {
+      ...(nuxt.options.runtimeConfig.aiArmor as Record<string, unknown> ?? {}),
+      ...toSerializable(options),
+    }
 
     // Auto-import composables
     addImports([
@@ -29,7 +51,25 @@ export default defineNuxtModule<ModuleOptions>({
       { name: 'useArmorSafety', from: resolve('./runtime/composables/useArmorSafety') },
     ])
 
-    // TODO: Add server middleware for /api/ai/** routes
-    // TODO: Add server API routes for /api/_armor/*
+    // Server plugin to initialize armor instance
+    addServerPlugin(resolve('./runtime/server/plugins/armor'))
+
+    // API routes (only when explicitly enabled or in dev mode)
+    addServerHandler({
+      route: '/api/_armor/usage',
+      handler: resolve('./runtime/server/api/_armor/usage.get'),
+    })
+    addServerHandler({
+      route: '/api/_armor/status',
+      handler: resolve('./runtime/server/api/_armor/status.get'),
+    })
+
+    // Rate limit middleware (only when configured)
+    if (options.rateLimit) {
+      addServerHandler({
+        middleware: true,
+        handler: resolve('./runtime/server/middleware/armor-rate-limit'),
+      })
+    }
   },
 })

@@ -58,7 +58,12 @@ export function createLogger(config: LoggingConfig) {
     }
 
     if (config.onRequest) {
-      await config.onRequest(entry)
+      try {
+        await config.onRequest(entry)
+      }
+      catch {
+        // Logging must never fail the main request path
+      }
     }
   }
 

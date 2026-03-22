@@ -23,12 +23,12 @@ export interface BudgetCheckResult {
 
 function getStartOfDay(): number {
   const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
 }
 
 function getStartOfMonth(): number {
   const now = new Date()
-  return new Date(now.getFullYear(), now.getMonth(), 1).getTime()
+  return Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
 }
 
 export function createCostTracker(config: BudgetConfig) {
@@ -68,6 +68,9 @@ export function createCostTracker(config: BudgetConfig) {
 
   async function trackUsage(model: string, inputTokens: number, outputTokens: number, userId?: string): Promise<void> {
     const cost = calculateCost(model, inputTokens, outputTokens)
+    if (cost === 0 && (inputTokens > 0 || outputTokens > 0) && config.onUnknownModel) {
+      config.onUnknownModel(model)
+    }
     let entries = await getEntries()
 
     // Prune entries older than 32 days to prevent unbounded memory growth
@@ -89,7 +92,7 @@ export function createCostTracker(config: BudgetConfig) {
 
   async function getDailyCost(userId?: string): Promise<number> {
     const dayStart = getStartOfDay()
-    const entries = await getEntries()
+    const entries = pruneOldEntries(await getEntries())
 
     return entries
       .filter(e => e.timestamp >= dayStart && (!userId || e.userId === userId))
@@ -98,7 +101,7 @@ export function createCostTracker(config: BudgetConfig) {
 
   async function getMonthlyCost(userId?: string): Promise<number> {
     const monthStart = getStartOfMonth()
-    const entries = await getEntries()
+    const entries = pruneOldEntries(await getEntries())
 
     return entries
       .filter(e => e.timestamp >= monthStart && (!userId || e.userId === userId))
@@ -121,9 +124,11 @@ export function createCostTracker(config: BudgetConfig) {
           suggestedModel: config.downgradeMap[model],
         }
       }
+      // downgrade-model without mapping falls back to block (safe default)
+      const effectiveAction = config.onExceeded === 'downgrade-model' ? 'block' : config.onExceeded
       return {
-        allowed: config.onExceeded !== 'block',
-        action: config.onExceeded,
+        allowed: effectiveAction === 'warn',
+        action: effectiveAction,
         currentDaily: dailyCost,
         currentMonthly: monthlyCost,
       }
@@ -140,9 +145,10 @@ export function createCostTracker(config: BudgetConfig) {
           suggestedModel: config.downgradeMap[model],
         }
       }
+      const effectiveAction = config.onExceeded === 'downgrade-model' ? 'block' : config.onExceeded
       return {
-        allowed: config.onExceeded !== 'block',
-        action: config.onExceeded,
+        allowed: effectiveAction === 'warn',
+        action: effectiveAction,
         currentDaily: dailyCost,
         currentMonthly: monthlyCost,
       }
@@ -160,9 +166,10 @@ export function createCostTracker(config: BudgetConfig) {
           suggestedModel: config.downgradeMap[model],
         }
       }
+      const effectiveAction = config.onExceeded === 'downgrade-model' ? 'block' : config.onExceeded
       return {
-        allowed: config.onExceeded !== 'block',
-        action: config.onExceeded,
+        allowed: effectiveAction === 'warn',
+        action: effectiveAction,
         currentDaily: dailyCost,
         currentMonthly: monthlyCost,
         perUserDaily: userDailyCost,
@@ -185,8 +192,11 @@ export function createCostTracker(config: BudgetConfig) {
     return getModelPricing(model) !== undefined
   }
 
-  function reset(): void {
+  async function reset(): Promise<void> {
     memoryStore.entries = []
+    if (externalStore) {
+      await externalStore.removeItem('cost-entries')
+    }
   }
 
   return {

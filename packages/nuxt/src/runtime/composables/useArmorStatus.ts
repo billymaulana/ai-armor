@@ -1,17 +1,39 @@
-import { ref } from 'vue'
+import type { ArmorStatusResponse } from '../types'
+import { computed, onMounted, onServerPrefetch, ref, shallowRef } from 'vue'
 
 export function useArmorStatus() {
-  const activeProvider = ref('')
-  const isHealthy = ref(true)
-  const fallbackActive = ref(false)
-  const rateLimitRemaining = ref(0)
+  const data = shallowRef<ArmorStatusResponse | null>(null)
+  const pending = ref(false)
+  const error = ref<Error | null>(null)
 
-  // TODO: fetch from /api/_armor/status
+  async function refresh(): Promise<void> {
+    pending.value = true
+    error.value = null
+    try {
+      data.value = await $fetch<ArmorStatusResponse>('/api/_armor/status')
+    }
+    catch (e) {
+      error.value = e instanceof Error ? e : new Error(String(e))
+    }
+    finally {
+      pending.value = false
+    }
+  }
+
+  // SSR-safe: fetch during server render and client mount
+  onServerPrefetch(refresh)
+  onMounted(refresh)
+
+  const isHealthy = computed(() => data.value?.healthy ?? true)
+  const rateLimitRemaining = computed(() => data.value?.rateLimitRemaining ?? 0)
+  const rateLimitResetAt = computed(() => data.value?.rateLimitResetAt ?? null)
 
   return {
-    activeProvider,
     isHealthy,
-    fallbackActive,
     rateLimitRemaining,
+    rateLimitResetAt,
+    refresh,
+    pending,
+    error,
   }
 }

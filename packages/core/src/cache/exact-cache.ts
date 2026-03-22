@@ -41,16 +41,14 @@ export function createExactCache(config: CacheConfig) {
   }
 
   function evictLRU(): void {
-    if (!config.maxSize || cache.size <= config.maxSize)
+    if (!config.maxSize || config.maxSize <= 0 || cache.size <= config.maxSize)
       return
 
     // Map iteration order = insertion order, first = oldest (LRU)
+    // Safe: we only delete already-yielded keys, so the iterator never exhausts early
     const iterator = cache.keys()
     while (cache.size > config.maxSize) {
-      const oldest = iterator.next()
-      if (oldest.done)
-        break
-      cache.delete(oldest.value)
+      cache.delete(iterator.next().value as string)
     }
   }
 

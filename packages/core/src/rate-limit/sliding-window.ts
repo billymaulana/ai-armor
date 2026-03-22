@@ -43,7 +43,10 @@ function resolveKey(config: RateLimitConfig, ctx: ArmorContext, ruleKey: string)
     case 'apiKey':
       return ctx.apiKey ?? 'unknown'
     default:
-      return (ctx[ruleKey] as string) ?? 'unknown'
+      if (Object.prototype.hasOwnProperty.call(ctx, ruleKey)) {
+        return (ctx[ruleKey] as string) ?? 'unknown'
+      }
+      return 'unknown'
   }
 }
 
@@ -155,8 +158,11 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
     }
   }
 
-  function reset(): void {
+  async function reset(): Promise<void> {
     store.entries.clear()
+    // Note: external store entries are not cleared here because StorageAdapter
+    // has no scan/clear API for key prefixes. For full external store reset,
+    // use the adapter's native clear mechanism.
   }
 
   return {

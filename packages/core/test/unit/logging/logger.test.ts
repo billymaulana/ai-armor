@@ -113,4 +113,127 @@ describe('createLogger', () => {
 
     expect(results).toEqual(['gpt-4o', 'claude-sonnet-4-6'])
   })
+
+  it('should filter cached field in getFilteredLogs', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['cached'],
+    })
+
+    logger.log(makeLog({ cached: true }))
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]!.cached).toBe(true)
+    expect(filtered[0]!.model).toBeUndefined()
+  })
+
+  it('should filter fallback field in getFilteredLogs', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['fallback'],
+    })
+
+    logger.log(makeLog({ fallback: true }))
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]!.fallback).toBe(true)
+    expect(filtered[0]!.model).toBeUndefined()
+  })
+
+  it('should filter userId field in getFilteredLogs', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['userId'],
+    })
+
+    logger.log(makeLog({ userId: 'user-1' }))
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]!.userId).toBe('user-1')
+    expect(filtered[0]!.model).toBeUndefined()
+  })
+
+  it('should not include userId when undefined in log entry', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['userId'],
+    })
+
+    logger.log(makeLog())
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]!.userId).toBeUndefined()
+  })
+
+  it('should filter tokens field in getFilteredLogs', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['tokens'],
+    })
+
+    logger.log(makeLog({ inputTokens: 200, outputTokens: 80 }))
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]!.inputTokens).toBe(200)
+    expect(filtered[0]!.outputTokens).toBe(80)
+    expect(filtered[0]!.model).toBeUndefined()
+  })
+
+  it('should filter latency field in getFilteredLogs', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['latency'],
+    })
+
+    logger.log(makeLog({ latency: 500 }))
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]!.latency).toBe(500)
+    expect(filtered[0]!.model).toBeUndefined()
+  })
+
+  it('should return full log when include is empty', () => {
+    const logger = createLogger({
+      enabled: true,
+      include: [],
+    })
+
+    const entry = makeLog()
+    logger.log(entry)
+
+    const filtered = logger.getFilteredLogs()
+    expect(filtered[0]).toEqual(entry)
+  })
+
+  it('should not crash when onRequest callback throws', async () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['model'],
+      onRequest: async () => { throw new Error('logging sink down') },
+    })
+
+    // Should not throw — logging errors are swallowed
+    await logger.log(makeLog())
+
+    expect(logger.getLogs()).toHaveLength(1)
+  })
+
+  it('should prune old entries when maxEntries exceeded', async () => {
+    const logger = createLogger({
+      enabled: true,
+      include: ['model'],
+      maxEntries: 3,
+    })
+
+    await logger.log(makeLog({ id: 'log-1', model: 'model-1' }))
+    await logger.log(makeLog({ id: 'log-2', model: 'model-2' }))
+    await logger.log(makeLog({ id: 'log-3', model: 'model-3' }))
+    await logger.log(makeLog({ id: 'log-4', model: 'model-4' }))
+
+    const logs = logger.getLogs()
+    expect(logs).toHaveLength(3)
+    // Oldest entry (log-1) should be pruned
+    expect(logs[0]!.id).toBe('log-2')
+    expect(logs[2]!.id).toBe('log-4')
+  })
 })

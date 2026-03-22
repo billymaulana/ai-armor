@@ -76,6 +76,47 @@ export const pricingDatabase: ModelPricing[] = [
   { model: 'amazon.nova-pro-v1:0', provider: 'amazon', input: 0.80, output: 3.20 },
   { model: 'amazon.nova-lite-v1:0', provider: 'amazon', input: 0.06, output: 0.24 },
   { model: 'amazon.nova-micro-v1:0', provider: 'amazon', input: 0.035, output: 0.14 },
+
+  // OpenAI Codex
+  { model: 'gpt-5.3-codex', provider: 'openai', input: 0.75, output: 3.00 },
+  { model: 'gpt-5.4-mini', provider: 'openai', input: 0.25, output: 2.00 },
+  { model: 'gpt-5', provider: 'openai', input: 1.25, output: 10.00 },
+
+  // Moonshot AI (Kimi)
+  { model: 'kimi-k2', provider: 'moonshot', input: 0.60, output: 2.50 },
+  { model: 'kimi-k2.5', provider: 'moonshot', input: 0.45, output: 2.20 },
+
+  // Zhipu AI (Z.AI / GLM)
+  { model: 'glm-4.7', provider: 'zhipu', input: 0.39, output: 1.75 },
+  { model: 'glm-5', provider: 'zhipu', input: 0.72, output: 2.30 },
+
+  // Groq (LPU inference)
+  { model: 'llama-4-scout', provider: 'groq', input: 0.11, output: 0.34 },
+  { model: 'llama3-70b-8192', provider: 'groq', input: 0.59, output: 0.79 },
+  { model: 'mixtral-8x7b-32768', provider: 'groq', input: 0.24, output: 0.24 },
+  { model: 'gemma2-9b-it', provider: 'groq', input: 0.20, output: 0.20 },
+
+  // Together AI
+  { model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo', provider: 'together', input: 0.59, output: 0.79 },
+  { model: 'meta-llama/Llama-4-Scout-17B-16E-Instruct', provider: 'together', input: 0.18, output: 0.30 },
+  { model: 'Qwen/Qwen2.5-72B-Instruct-Turbo', provider: 'together', input: 0.23, output: 0.23 },
+
+  // Fireworks AI
+  { model: 'accounts/fireworks/models/qwen3-8b', provider: 'fireworks', input: 0.20, output: 0.20 },
+  { model: 'accounts/fireworks/models/llama-v3p3-70b-instruct', provider: 'fireworks', input: 0.59, output: 0.79 },
+
+  // Azure OpenAI (same models, same pricing)
+  { model: 'gpt-4o-azure', provider: 'azure', input: 2.50, output: 10.00 },
+  { model: 'gpt-4o-mini-azure', provider: 'azure', input: 0.15, output: 0.60 },
+
+  // Perplexity AI
+  { model: 'sonar-pro', provider: 'perplexity', input: 3.00, output: 15.00 },
+  { model: 'sonar', provider: 'perplexity', input: 1.00, output: 1.00 },
+
+  // Alibaba Qwen
+  { model: 'qwen-plus', provider: 'alibaba', input: 0.40, output: 1.20 },
+  { model: 'qwen2.5-max', provider: 'alibaba', input: 1.60, output: 6.40 },
+  { model: 'qwen2.5-72b-instruct', provider: 'alibaba', input: 0.23, output: 0.46 },
 ]
 
 const pricingMap = new Map<string, ModelPricing>()
@@ -104,5 +145,37 @@ export function getProvider(model: string): string {
 }
 
 export function getAllModels(): string[] {
-  return pricingDatabase.map(p => p.model)
+  return [...pricingMap.keys()]
+}
+
+export function addModel(pricing: ModelPricing): void {
+  if (pricingMap.has(pricing.model)) {
+    throw new Error(`Model "${pricing.model}" already exists in pricing database`)
+  }
+  pricingMap.set(pricing.model, pricing)
+}
+
+export function updateModel(model: string, updates: Partial<Omit<ModelPricing, 'model'>>): void {
+  const existing = pricingMap.get(model)
+  if (!existing) {
+    throw new Error(`Model "${model}" not found in pricing database`)
+  }
+  pricingMap.set(model, { ...existing, ...updates })
+}
+
+export function removeModel(model: string): boolean {
+  return pricingMap.delete(model)
+}
+
+export function resetPricing(): void {
+  pricingMap.clear()
+  for (const entry of pricingDatabase) {
+    pricingMap.set(entry.model, entry)
+  }
+}
+
+export function registerModels(models: ModelPricing[]): void {
+  for (const pricing of models) {
+    pricingMap.set(pricing.model, pricing)
+  }
 }

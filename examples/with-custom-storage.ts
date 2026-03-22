@@ -13,27 +13,42 @@ import process from 'node:process'
 import { createArmor } from 'ai-armor'
 import Redis from 'ioredis'
 
-// --- Redis StorageAdapter implementation ---
-function createRedisAdapter(redis: Redis): StorageAdapter {
+// --- Production Redis StorageAdapter ---
+interface RedisAdapterOptions {
+  prefix?: string // Key namespace (default: 'ai-armor')
+  ttl?: number // Default TTL in seconds (default: 86400 = 24h)
+}
+
+function createRedisAdapter(redis: Redis, options?: RedisAdapterOptions): StorageAdapter {
+  const prefix = options?.prefix ?? 'ai-armor'
+  const defaultTTL = options?.ttl ?? 86400
+
   return {
     async getItem(key: string) {
-      const data = await redis.get(`ai-armor:${key}`)
+      const data = await redis.get(`${prefix}:${key}`)
       if (!data)
         return null
-      return JSON.parse(data)
+      try {
+        return JSON.parse(data)
+      }
+      catch {
+        return null
+      }
     },
     async setItem(key: string, value: unknown) {
-      await redis.set(`ai-armor:${key}`, JSON.stringify(value), 'EX', 86400) // 24h TTL
+      // Rate limit entries expire faster than cost entries
+      const ttl = key.startsWith('rate-limit:') ? 3600 : defaultTTL
+      await redis.set(`${prefix}:${key}`, JSON.stringify(value), 'EX', ttl)
     },
     async removeItem(key: string) {
-      await redis.del(`ai-armor:${key}`)
+      await redis.del(`${prefix}:${key}`)
     },
   }
 }
 
 // --- Setup ---
 const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
-const store = createRedisAdapter(redis)
+const store = createRedisAdapter(redis, { prefix: 'myapp:armor' })
 
 const armor = createArmor({
   rateLimit: {

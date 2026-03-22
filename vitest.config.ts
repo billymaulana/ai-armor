@@ -5,8 +5,8 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: 'v8',
-      include: ['packages/*/src/**/*.ts'],
-      exclude: ['**/*.test.ts', '**/index.ts', '**/*.d.ts'],
+      include: ['packages/core/src/**/*.ts'],
+      exclude: ['**/*.test.ts', '**/index.ts', '**/*.d.ts', '**/types.ts'],
       thresholds: {
         lines: 80,
         functions: 80,

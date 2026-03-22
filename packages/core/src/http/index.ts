@@ -57,6 +57,23 @@ export function createArmorHandler(armor: ArmorInstance, options?: {
   return async (req: HttpRequest, res: HttpResponse, next?: () => void) => {
     const ctx = extractContext(req)
 
+    // Check safety on request body
+    const body = req.body as Record<string, unknown> | undefined
+    if (body) {
+      const safetyRequest: ArmorRequest = {
+        model: (body.model as string) ?? '',
+        messages: (body.messages as unknown[]) ?? [],
+      }
+      const safetyResult = armor.checkSafety(safetyRequest, ctx)
+      if (safetyResult.blocked) {
+        res.status(403).json({
+          error: 'Request blocked by safety guard',
+          reason: safetyResult.reason,
+        })
+        return
+      }
+    }
+
     // Check rate limit
     const rateLimitResult = await armor.checkRateLimit(ctx)
     if (!rateLimitResult.allowed) {
@@ -80,7 +97,6 @@ export function createArmorHandler(armor: ArmorInstance, options?: {
     }
 
     // Extract model from request body
-    const body = req.body as Record<string, unknown> | undefined
     const rawModel = (body?.model as string) ?? ''
     const resolvedModel = armor.resolveModel(rawModel)
 
@@ -129,12 +145,12 @@ export function createArmorHandler(armor: ArmorInstance, options?: {
       }
     }
 
-    // If budget suggests downgrade, modify the model
-    if (budgetResult.suggestedModel && body) {
-      (body as Record<string, unknown>).model = budgetResult.suggestedModel
-    }
-    else if (body && resolvedModel !== rawModel) {
-      (body as Record<string, unknown>).model = resolvedModel
+    // If budget suggests downgrade or model was aliased, create a modified body copy
+    // (never mutate the original req.body -- downstream middleware may hold a reference)
+    if (body && (budgetResult.suggestedModel || resolvedModel !== rawModel)) {
+      const modifiedBody = { ...body }
+      modifiedBody.model = budgetResult.suggestedModel ?? resolvedModel
+      ;(req as Record<string, unknown>).body = modifiedBody
     }
 
     if (next) {

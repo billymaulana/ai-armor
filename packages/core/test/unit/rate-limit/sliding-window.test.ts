@@ -200,4 +200,198 @@ describe('createSlidingWindowLimiter', () => {
       store: 'redis',
     })).toThrow('requires passing a StorageAdapter')
   })
+
+  it('should use external StorageAdapter for entries', async () => {
+    const storage = new Map<string, unknown>()
+    const adapter = {
+      getItem: async (key: string) => storage.get(key),
+      setItem: async (key: string, value: unknown) => { storage.set(key, value) },
+      removeItem: async (key: string) => { storage.delete(key) },
+    }
+
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'user', limit: 2, window: '1m' }],
+      store: adapter,
+    })
+
+    const ctx = { userId: 'user-1' }
+
+    const r1 = await limiter.check(ctx)
+    expect(r1.allowed).toBe(true)
+    expect(storage.size).toBeGreaterThan(0)
+
+    const r2 = await limiter.check(ctx)
+    expect(r2.allowed).toBe(true)
+
+    const r3 = await limiter.check(ctx)
+    expect(r3.allowed).toBe(false)
+  })
+
+  it('should handle external store returning non-array', async () => {
+    const adapter = {
+      getItem: async () => null,
+      setItem: async () => {},
+      removeItem: async () => {},
+    }
+
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'user', limit: 2, window: '1m' }],
+      store: adapter,
+    })
+
+    const result = await limiter.check({ userId: 'user-1' })
+    expect(result.allowed).toBe(true)
+  })
+
+  it('should resolve ip key from context', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'ip', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({ ip: '1.2.3.4' })
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({ ip: '1.2.3.4' })
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should resolve apiKey key from context', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'apiKey', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({ apiKey: 'sk-123' })
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({ apiKey: 'sk-123' })
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should resolve custom key from context', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'orgId', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({ orgId: 'org-1' })
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({ orgId: 'org-1' })
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should fallback to anonymous when userId is undefined', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'user', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({})
+    expect(r1.allowed).toBe(true)
+
+    // Same anonymous user
+    const r2 = await limiter.check({})
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should fallback to unknown when ip is undefined', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'ip', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({})
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({})
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should fallback to unknown when apiKey is undefined', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'apiKey', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({})
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({})
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should return 0 remaining when rules array is empty', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [],
+    })
+
+    const result = await limiter.check({ userId: 'user-1' })
+    expect(result.allowed).toBe(true)
+    expect(result.remaining).toBe(0)
+  })
+
+  it('should not access prototype properties for custom keys', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'toString', limit: 1, window: '1m' }],
+    })
+
+    // toString exists on prototype but NOT as own property — should resolve to 'unknown'
+    const r1 = await limiter.check({})
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({})
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should fallback to unknown when own property value is nullish', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'orgId', limit: 1, window: '1m' }],
+    })
+
+    // orgId exists as own property but value is undefined
+    const r1 = await limiter.check({ orgId: undefined })
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({ orgId: undefined })
+    expect(r2.allowed).toBe(false)
+  })
+
+  it('should use own property for custom key when it exists on context', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'orgId', limit: 1, window: '1m' }],
+    })
+
+    // orgId is an own property — should use its value
+    const r1 = await limiter.check({ orgId: 'org-a' })
+    expect(r1.allowed).toBe(true)
+
+    // Same orgId blocked
+    const r2 = await limiter.check({ orgId: 'org-a' })
+    expect(r2.allowed).toBe(false)
+
+    // Different orgId allowed
+    const r3 = await limiter.check({ orgId: 'org-b' })
+    expect(r3.allowed).toBe(true)
+  })
+
+  it('should fallback to unknown for custom key when context value is undefined', async () => {
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'orgId', limit: 1, window: '1m' }],
+    })
+
+    const r1 = await limiter.check({})
+    expect(r1.allowed).toBe(true)
+
+    const r2 = await limiter.check({})
+    expect(r2.allowed).toBe(false)
+  })
 })

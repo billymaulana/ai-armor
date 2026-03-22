@@ -1,0 +1,16 @@
+{
+  "name": "playground-nuxt",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "@ai-armor/nuxt": "workspace:*",
+    "ai-armor": "workspace:*",
+    "nuxt": "^3.17.5"
+  }
+}

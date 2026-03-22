@@ -20,6 +20,7 @@ export interface BudgetConfig {
   downgradeMap?: Record<string, string>
   store?: 'memory' | 'redis' | StorageAdapter
   onWarned?: (ctx: ArmorContext, budget: { daily: number, monthly: number, perUserDaily?: number }) => void
+  onUnknownModel?: (model: string) => void
 }
 
 export interface FallbackConfig {
@@ -106,6 +107,20 @@ export interface RateLimitResult {
   resetAt: number
 }
 
+export interface SafetyCheckResult {
+  allowed: boolean
+  blocked: boolean
+  reason: string | null
+  details: string[]
+}
+
+export interface FallbackResult<T = unknown> {
+  result: T
+  model: string
+  attempts: number
+  fallbackUsed: boolean
+}
+
 export interface ArmorInstance {
   config: ArmorConfig
   checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
@@ -117,8 +132,19 @@ export interface ArmorInstance {
   log: (entry: ArmorLog) => Promise<void>
   getLogs: () => ArmorLog[]
   estimateCost: (model: string, inputTokens: number, outputTokens: number) => number
+  checkSafety: (request: ArmorRequest, ctx: ArmorContext) => SafetyCheckResult
+  executeFallback: <T>(request: ArmorRequest, handler: (model: string) => Promise<T>) => Promise<FallbackResult<T>>
 }
 
+/**
+ * External storage adapter for rate limiting and budget tracking.
+ *
+ * **Concurrency note:** The built-in in-memory store is safe under Node.js
+ * single-threaded concurrency. For multi-instance deployments (e.g. multiple
+ * server processes or serverless), provide a StorageAdapter backed by an
+ * atomic store (e.g. Redis with Lua scripts) to prevent TOCTOU race conditions
+ * in rate limiting and budget enforcement.
+ */
 export interface StorageAdapter {
   getItem: (key: string) => Promise<unknown>
   setItem: (key: string, value: unknown) => Promise<void>

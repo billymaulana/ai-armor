@@ -155,4 +155,28 @@ describe('createExactCache', () => {
     cache.set(req, { content: 'response' })
     expect(cache.has(req)).toBe(true)
   })
+
+  it('should evict expired entries when calling size()', () => {
+    vi.useFakeTimers()
+
+    const cache = createExactCache({
+      enabled: true,
+      strategy: 'exact',
+      ttl: 1, // 1 second
+      driver: 'memory',
+    })
+
+    cache.set(makeRequest('model-a', [{ content: 'a' }]), { content: 'a' })
+    cache.set(makeRequest('model-b', [{ content: 'b' }]), { content: 'b' })
+
+    expect(cache.size()).toBe(2)
+
+    // Advance time past TTL
+    vi.advanceTimersByTime(1100)
+
+    // size() triggers evictExpired, should remove both expired entries
+    expect(cache.size()).toBe(0)
+
+    vi.useRealTimers()
+  })
 })

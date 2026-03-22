@@ -5,18 +5,34 @@
   "description": "Nuxt module for ai-armor -- production AI toolkit",
   "author": "billymaulana",
   "license": "MIT",
+  "homepage": "https://github.com/billymaulana/ai-armor#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/billymaulana/ai-armor",
     "directory": "packages/nuxt"
   },
+  "bugs": {
+    "url": "https://github.com/billymaulana/ai-armor/issues"
+  },
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "ai",
+    "llm",
+    "rate-limiting",
+    "cost-tracking",
+    "safety",
+    "guardrails",
+    "ai-armor"
+  ],
   "exports": {
     ".": {
       "types": "./dist/types.d.ts",
-      "import": "./dist/module.mjs"
+      "import": "./dist/module.mjs",
+      "require": "./dist/module.cjs"
     }
   },
-  "main": "./dist/module.mjs",
+  "main": "./dist/module.cjs",
   "types": "./dist/types.d.ts",
   "files": [
     "dist"
@@ -27,13 +43,16 @@
     "dev:build": "nuxi build playground",
     "prepack": "nuxt-module-build build"
   },
+  "peerDependencies": {
+    "nuxt": ">=3.0.0"
+  },
   "dependencies": {
     "@nuxt/kit": "^3.16.0",
+    "@nuxt/schema": "^3.16.0",
     "ai-armor": "workspace:*"
   },
   "devDependencies": {
     "@nuxt/module-builder": "^0.8.4",
-    "@nuxt/schema": "^3.16.0",
     "@nuxt/test-utils": "^3.17.2",
     "nuxt": "^3.16.0"
   }

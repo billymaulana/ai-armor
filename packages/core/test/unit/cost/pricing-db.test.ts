@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { calculateCost, getAllModels, getModelPricing, getProvider, pricingDatabase } from '../../../src/pricing/database'
+import { afterEach, describe, expect, it } from 'vitest'
+import { addModel, calculateCost, getAllModels, getModelPricing, getProvider, pricingDatabase, registerModels, removeModel, resetPricing, updateModel } from '../../../src/pricing/database'
 
 describe('pricingDatabase', () => {
   it('should have at least 40 models', () => {
@@ -78,5 +78,81 @@ describe('getAllModels', () => {
     expect(models.length).toBe(pricingDatabase.length)
     expect(models).toContain('gpt-4o')
     expect(models).toContain('claude-sonnet-4-6')
+  })
+})
+
+describe('dynamic pricing', () => {
+  afterEach(() => {
+    resetPricing()
+  })
+
+  const testModel = { model: 'test-model-x', provider: 'test-provider', input: 1.00, output: 5.00 }
+
+  it('should add a new model', () => {
+    addModel(testModel)
+    const pricing = getModelPricing('test-model-x')
+    expect(pricing).toBeDefined()
+    expect(pricing!.provider).toBe('test-provider')
+    expect(pricing!.input).toBe(1.00)
+    expect(pricing!.output).toBe(5.00)
+  })
+
+  it('should throw when adding duplicate model', () => {
+    addModel(testModel)
+    expect(() => addModel(testModel)).toThrow('Model "test-model-x" already exists in pricing database')
+  })
+
+  it('should update existing model pricing', () => {
+    addModel(testModel)
+    updateModel('test-model-x', { input: 2.00, output: 8.00 })
+    const updated = getModelPricing('test-model-x')
+    expect(updated!.input).toBe(2.00)
+    expect(updated!.output).toBe(8.00)
+    expect(updated!.provider).toBe('test-provider')
+  })
+
+  it('should throw when updating non-existent model', () => {
+    expect(() => updateModel('no-such-model', { input: 1.00 })).toThrow('Model "no-such-model" not found in pricing database')
+  })
+
+  it('should remove existing model', () => {
+    addModel(testModel)
+    expect(removeModel('test-model-x')).toBe(true)
+    expect(getModelPricing('test-model-x')).toBeUndefined()
+  })
+
+  it('should return false when removing non-existent model', () => {
+    expect(removeModel('no-such-model')).toBe(false)
+  })
+
+  it('should reset pricing to defaults', () => {
+    addModel(testModel)
+    removeModel('gpt-4o')
+    resetPricing()
+    expect(getModelPricing('test-model-x')).toBeUndefined()
+    expect(getModelPricing('gpt-4o')).toBeDefined()
+  })
+
+  it('should batch register models (overwrite existing)', () => {
+    const batch = [
+      { model: 'gpt-4o', provider: 'openai', input: 99.00, output: 99.00 },
+      { model: 'custom-model', provider: 'custom', input: 0.50, output: 1.00 },
+    ]
+    registerModels(batch)
+    expect(getModelPricing('gpt-4o')!.input).toBe(99.00)
+    expect(getModelPricing('custom-model')!.provider).toBe('custom')
+  })
+
+  it('should include runtime-added models in getAllModels()', () => {
+    addModel(testModel)
+    const models = getAllModels()
+    expect(models).toContain('test-model-x')
+  })
+
+  it('should calculate cost for runtime-added models', () => {
+    addModel(testModel)
+    // input: $1.00/1M, output: $5.00/1M
+    const cost = calculateCost('test-model-x', 1_000_000, 1_000_000)
+    expect(cost).toBeCloseTo(6.00, 2)
   })
 })
