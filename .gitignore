@@ -41,10 +41,8 @@ coverage/
 npm-debug.log*
 pnpm-debug.log*
 
-# Changesets temp
-.changeset/*.md
-!.changeset/config.json
-!.changeset/README.md
+# VitePress cache
+docs/.vitepress/cache/
 
 # Turbo
 .turbo/

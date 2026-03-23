@@ -1,5 +1,4 @@
 import type { ArmorContext, ArmorInstance, ArmorLog, ArmorRequest } from '../types'
-import { getProvider } from '../pricing/database'
 
 interface HttpRequest {
   method?: string
@@ -123,13 +122,13 @@ export function createArmorHandler(armor: ArmorInstance, options?: {
         request.tools = body.tools as unknown[]
       }
 
-      const cached = armor.getCachedResponse(request)
+      const cached = await armor.getCachedResponse(request)
       if (cached) {
         const logEntry: ArmorLog = {
           id: crypto.randomUUID(),
           timestamp: Date.now(),
           model: resolvedModel,
-          provider: getProvider(resolvedModel),
+          provider: armor.getProvider(resolvedModel),
           inputTokens: 0,
           outputTokens: 0,
           cost: 0,

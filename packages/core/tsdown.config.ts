@@ -5,6 +5,7 @@ export default defineConfig({
     'index': 'src/index.ts',
     'ai-sdk': 'src/middleware/ai-sdk.ts',
     'http': 'src/http/index.ts',
+    'redis': 'src/redis.ts',
   },
   format: ['esm', 'cjs'],
   dts: true,

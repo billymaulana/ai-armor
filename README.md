@@ -1,6 +1,8 @@
 <p align="center">
-  <h1 align="center">ai-armor</h1>
+  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.svg" alt="ai-armor logo" width="180" />
 </p>
+
+<h1 align="center">ai-armor</h1>
 
 <p align="center">
   <strong>Production AI toolkit for TypeScript -- the LiteLLM for the JavaScript ecosystem.</strong>
@@ -10,9 +12,15 @@
   <a href="https://www.npmjs.com/package/ai-armor"><img src="https://img.shields.io/npm/v/ai-armor?color=yellow&label=npm" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://github.com/billymaulana/ai-armor/actions/workflows/ci.yml"><img src="https://github.com/billymaulana/ai-armor/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://codecov.io/gh/billymaulana/ai-armor"><img src="https://img.shields.io/badge/coverage-96.6%25-brightgreen" alt="Coverage: 96.6%"></a>
   <a href="https://www.npmjs.com/package/ai-armor"><img src="https://img.shields.io/npm/dm/ai-armor?color=green" alt="npm downloads"></a>
   <a href="https://github.com/billymaulana/ai-armor"><img src="https://img.shields.io/github/stars/billymaulana/ai-armor?style=social" alt="GitHub stars"></a>
-  <a href="https://stackblitz.com/github/billymaulana/ai-armor/tree/main/playground-nuxt"><img src="https://developer.stackblitz.com/img/open_in_stackblitz_small.svg" alt="Open in StackBlitz"></a>
+</p>
+
+<p align="center">
+  <a href="https://billymaulana.github.io/ai-armor/">Documentation</a> &bull;
+  <a href="https://stackblitz.com/github/billymaulana/ai-armor/tree/main/playground-nuxt">Playground</a> &bull;
+  <a href="https://github.com/billymaulana/ai-armor/issues">Issues</a>
 </p>
 
 <p align="center">
@@ -41,7 +49,8 @@ Every production AI application rebuilds the same infrastructure from scratch: r
 | **Cost Tracking** | Automatic token counting with built-in pricing for 100+ models |
 | **Budget Controls** | Daily / monthly / per-user limits -- block, warn, or auto-downgrade model |
 | **Fallback Chains** | Health-tracked provider chains with retries and exponential backoff |
-| **Response Caching** | Exact-match cache with LRU eviction and configurable TTL |
+| **Response Caching** | Exact-match and semantic (embedding) cache with LRU eviction |
+| **Redis Adapter** | Official Redis storage adapter for distributed rate limiting and budgets |
 | **Model Alias Routing** | Semantic aliases (`fast` -> `gpt-4o-mini`, `smart` -> `claude-sonnet-4-6`) |
 | **Safety Guardrails** | Prompt injection detection, PII detection, token limits, blocked patterns |
 | **Structured Logging** | Per-request observability with hooks for external systems |
@@ -90,7 +99,7 @@ const armor = createArmor({
     onExceeded: 'downgrade-model',
     downgradeMap: {
       'gpt-4o': 'gpt-4o-mini',
-      'claude-sonnet-4-6': 'claude-haiku-3.5',
+      'claude-sonnet-4-6': 'claude-haiku-4-5',
     },
   },
 
@@ -109,7 +118,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 300,
-    driver: 'memory',
     maxSize: 500,
   },
 
@@ -321,6 +329,69 @@ const { blockCount, blockReason, recordBlock } = useArmorSafety()
 |:---|:---|
 | `GET /api/_armor/status` | Health status, rate limit info |
 | `GET /api/_armor/usage` | Cost tracking, budget utilization |
+| `POST /api/_armor/safety` | Safety check for text content |
+
+All admin routes are protected by `adminSecret` when configured in `nuxt.config.ts`.
+
+---
+
+## Redis Adapter
+
+For distributed deployments (multiple server processes, serverless), use the official Redis adapter:
+
+```ts
+import { createArmor, createRedisAdapter } from 'ai-armor'
+import Redis from 'ioredis'
+
+const redis = new Redis()
+const adapter = createRedisAdapter(redis, { prefix: 'myapp:', ttl: 86400 })
+
+const armor = createArmor({
+  rateLimit: {
+    strategy: 'sliding-window',
+    rules: [{ key: 'user', limit: 20, window: '1m' }],
+    store: adapter,
+  },
+  budget: {
+    daily: 50,
+    monthly: 500,
+    onExceeded: 'block',
+    store: adapter,
+  },
+})
+```
+
+Works with any Redis-compatible client (ioredis, @upstash/redis, etc). Also available as `import { createRedisAdapter } from 'ai-armor/redis'`.
+
+---
+
+## Semantic Caching
+
+For fuzzy cache matching using embeddings, use `strategy: 'semantic'`:
+
+```ts
+import { openai } from '@ai-sdk/openai'
+import { createArmor } from 'ai-armor'
+
+const armor = createArmor({
+  cache: {
+    enabled: true,
+    strategy: 'semantic',
+    ttl: 3600,
+    maxSize: 1000,
+    similarityThreshold: 0.92,
+    embeddingFn: async (text) => {
+      const res = await openai.embeddings.create({
+        model: 'text-embedding-3-small',
+        input: text,
+      })
+      return res.data[0].embedding
+    },
+  },
+})
+```
+
+Semantic caching returns cached responses for similar (not just identical) prompts. Built-in cosine similarity engine, you supply the embedding function.
 
 ---
 
@@ -347,39 +418,23 @@ pnpm playground:nuxt
 
 ---
 
-## Feature Reference
-
-| Feature | Config Key | One-Liner |
-|:---|:---|:---|
-| Rate Limiting | `rateLimit` | Sliding-window rate limiter with per-user, per-IP, and per-API-key rules |
-| Cost Tracking | `budget` | Automatic token counting and cost calculation for 100+ models |
-| Budget Controls | `budget.onExceeded` | Block requests, warn, or auto-downgrade to a cheaper model |
-| Fallback Chains | `fallback` | Retry failed requests across providers with exponential backoff |
-| Response Caching | `cache` | Exact-match cache with LRU eviction, configurable TTL and max size |
-| Model Routing | `routing` | Map semantic aliases to concrete model identifiers |
-| Prompt Injection | `safety.promptInjection` | Detect and block common prompt injection patterns |
-| PII Detection | `safety.piiDetection` | Detect emails, phone numbers, SSNs, and other PII in prompts |
-| Token Limits | `safety.maxTokensPerRequest` | Reject prompts that exceed a token count threshold |
-| Blocked Patterns | `safety.blockedPatterns` | Block requests matching custom regex patterns |
-| Request Logging | `logging` | Structured per-request logs with model, tokens, cost, and latency |
-| Custom Storage | `rateLimit.store` | Plug in Redis or any async key-value store for distributed deployments |
-
----
-
 ## Comparison
 
 | Capability | ai-armor | LiteLLM | Portkey | Vercel AI SDK |
 |:---|:---:|:---:|:---:|:---:|
-| Embeddable (npm library) | Yes | No (proxy) | No (SaaS) | Yes |
-| TypeScript native | Yes | No (Python) | Yes | Yes |
-| Self-hosted | Yes | Yes | Partial | N/A |
-| Rate limiting | Yes | Yes | No | No |
-| Cost tracking + budgets | Yes | Yes | Yes (SaaS) | No |
-| Fallback chains | Yes | Yes | Yes | No |
-| Response caching | Yes | Yes | Yes | No |
-| Safety guardrails | Yes | No | No | No |
-| Model alias routing | Yes | Yes | No | No |
-| Zero external dependencies | Yes | No | No | Yes |
+| Embeddable (npm library) | :white_check_mark: | :x: (proxy) | :x: (SaaS) | :white_check_mark: |
+| TypeScript native | :white_check_mark: | :x: (Python) | :white_check_mark: | :white_check_mark: |
+| Self-hosted | :white_check_mark: | :white_check_mark: | :warning: Partial | N/A |
+| Rate limiting | :white_check_mark: | :white_check_mark: | :x: | :x: |
+| Cost tracking + budgets | :white_check_mark: | :white_check_mark: | :white_check_mark: (SaaS) | :x: |
+| Fallback chains | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Response caching | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
+| Semantic caching | :white_check_mark: | :x: | :x: | :x: |
+| Safety guardrails | :white_check_mark: | :x: | :x: | :x: |
+| Model alias routing | :white_check_mark: | :white_check_mark: | :x: | :x: |
+| Redis adapter | :white_check_mark: | :white_check_mark: | N/A | :x: |
+| Nuxt module | :white_check_mark: | :x: | :x: | :x: |
+| Minimal dependencies | :white_check_mark: (1 dep) | :x: | :x: | :white_check_mark: |
 
 ---
 
@@ -387,7 +442,7 @@ pnpm playground:nuxt
 
 - **Language:** TypeScript (strict mode, zero `any`)
 - **Build:** tsdown (ESM + CJS dual output)
-- **Test:** Vitest (265+ tests, >80% coverage)
+- **Test:** Vitest (381 tests, 96.6% coverage)
 - **Lint:** @antfu/eslint-config
 - **Monorepo:** pnpm workspaces
 - **Release:** Changesets + GitHub Actions
@@ -410,6 +465,24 @@ pnpm test
 # Run quality checks (lint + typecheck + tests)
 pnpm quality
 ```
+
+---
+
+## Sponsors
+
+<p align="center">
+  <em>ai-armor is free and open source. If it saves you money on AI costs, consider sponsoring!</em>
+</p>
+
+<p align="center">
+  <a href="https://github.com/sponsors/billymaulana">
+    <img src="https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?logo=github&logoColor=white" alt="Sponsor on GitHub">
+  </a>
+</p>
+
+<p align="center">
+  Your logo here -- <a href="https://github.com/sponsors/billymaulana">become a sponsor</a>
+</p>
 
 ---
 

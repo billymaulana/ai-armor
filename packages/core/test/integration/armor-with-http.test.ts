@@ -123,12 +123,12 @@ describe('createArmorHandler', () => {
         enabled: true,
         strategy: 'exact',
         ttl: 3600,
-        driver: 'memory',
+
       },
     })
 
     // Pre-populate cache
-    armor.setCachedResponse(
+    await armor.setCachedResponse(
       { model: 'gpt-4o', messages: [{ role: 'user', content: 'hello' }] },
       { content: 'cached' },
     )

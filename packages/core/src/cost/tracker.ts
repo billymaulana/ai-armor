@@ -18,6 +18,7 @@ export interface BudgetCheckResult {
   currentDaily: number
   currentMonthly: number
   perUserDaily?: number
+  perUserMonthly?: number
   suggestedModel?: string
 }
 
@@ -154,7 +155,7 @@ export function createCostTracker(config: BudgetConfig) {
       }
     }
 
-    // Check per-user limit
+    // Check per-user daily limit
     if (config.perUser && ctx.userId && userDailyCost >= config.perUser) {
       if (config.onExceeded === 'downgrade-model' && config.downgradeMap?.[model]) {
         return {
@@ -173,6 +174,31 @@ export function createCostTracker(config: BudgetConfig) {
         currentDaily: dailyCost,
         currentMonthly: monthlyCost,
         perUserDaily: userDailyCost,
+      }
+    }
+
+    // Check per-user monthly limit
+    if (config.perUserMonthly && ctx.userId) {
+      const userMonthlyCost = await getMonthlyCost(ctx.userId)
+      if (userMonthlyCost >= config.perUserMonthly) {
+        if (config.onExceeded === 'downgrade-model' && config.downgradeMap?.[model]) {
+          return {
+            allowed: true,
+            action: 'downgrade-model',
+            currentDaily: dailyCost,
+            currentMonthly: monthlyCost,
+            perUserMonthly: userMonthlyCost,
+            suggestedModel: config.downgradeMap[model],
+          }
+        }
+        const effectiveAction = config.onExceeded === 'downgrade-model' ? 'block' : config.onExceeded
+        return {
+          allowed: effectiveAction === 'warn',
+          action: effectiveAction,
+          currentDaily: dailyCost,
+          currentMonthly: monthlyCost,
+          perUserMonthly: userMonthlyCost,
+        }
       }
     }
 

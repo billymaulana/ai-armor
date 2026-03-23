@@ -183,7 +183,6 @@ interface CacheConfig {
   enabled: boolean
   strategy: 'exact'
   ttl: number
-  driver: string
   maxSize?: number
   keyFn?: (request: ArmorRequest) => string
 }
@@ -194,7 +193,6 @@ interface CacheConfig {
 | `enabled` | `boolean` | Yes | Enable or disable caching. |
 | `strategy` | `'exact'` | Yes | Cache matching strategy. Currently only exact-match is supported. |
 | `ttl` | `number` | Yes | Time-to-live for cache entries, in seconds. |
-| `driver` | `string` | Yes | Storage driver identifier (e.g., `'memory'`). |
 | `maxSize` | `number` | No | Maximum number of cache entries. When exceeded, LRU entries are evicted. |
 | `keyFn` | `(request: ArmorRequest) => string` | No | Custom function to generate cache keys. Default serializes model + messages + temperature + tools. |
 

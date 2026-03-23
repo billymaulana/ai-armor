@@ -91,7 +91,6 @@ See [Cost Tracking guide](/guide/cost-tracking) for details.
 | `enabled` | `boolean` | Yes | Enable/disable caching |
 | `strategy` | `'exact'` | Yes | Cache matching strategy |
 | `ttl` | `number` | Yes | Time-to-live in seconds |
-| `driver` | `string` | Yes | Storage driver (e.g., `'memory'`) |
 | `maxSize` | `number` | No | Maximum entries (LRU eviction) |
 | `keyFn` | `(request: ArmorRequest) => string` | No | Custom cache key generator |
 

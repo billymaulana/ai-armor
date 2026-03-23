@@ -1,32 +1,49 @@
-import { ref } from 'vue'
+import type { ArmorSafetyResponse } from '../types'
+import { computed, ref, shallowRef } from 'vue'
 
-// Per-instance state using a factory pattern.
-// Each call to useArmorSafety() returns shared refs within the same component tree,
-// but we use separate refs per-composable-call to avoid SSR cross-request pollution
-// that occurs with module-level state.
-// For shared state across components, wrap with Nuxt's useState() in your app code.
 export function useArmorSafety() {
-  const lastBlocked = ref<string | null>(null)
-  const blockReason = ref<string | null>(null)
+  const lastCheck = shallowRef<ArmorSafetyResponse | null>(null)
+  const pending = ref(false)
+  const error = ref<Error | null>(null)
   const blockCount = ref(0)
 
-  function recordBlock(reason: string): void {
-    lastBlocked.value = new Date().toISOString()
-    blockReason.value = reason
-    blockCount.value++
+  async function checkText(text: string, model?: string): Promise<ArmorSafetyResponse> {
+    pending.value = true
+    error.value = null
+    try {
+      const result = await $fetch<ArmorSafetyResponse>('/api/_armor/safety', {
+        method: 'POST',
+        body: { text, model },
+      })
+      lastCheck.value = result
+      if (result.blocked)
+        blockCount.value++
+      return result
+    }
+    catch (e) {
+      error.value = e instanceof Error ? e : new Error(String(e))
+      throw error.value
+    }
+    finally {
+      pending.value = false
+    }
   }
 
   function reset(): void {
-    lastBlocked.value = null
-    blockReason.value = null
+    lastCheck.value = null
     blockCount.value = 0
+    error.value = null
   }
 
   return {
-    lastBlocked,
-    blockReason,
+    checkText,
+    lastCheck,
+    isBlocked: computed(() => lastCheck.value?.blocked ?? false),
+    reason: computed(() => lastCheck.value?.reason ?? null),
+    details: computed(() => lastCheck.value?.details ?? []),
     blockCount,
-    recordBlock,
     reset,
+    pending,
+    error,
   }
 }
