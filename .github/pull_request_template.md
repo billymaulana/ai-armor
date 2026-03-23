@@ -1,6 +1,6 @@
 ## Summary
 
-<!-- What does this PR do? -->
+<!-- What does this PR do? Keep it short. -->
 
 ## Changes
 
@@ -8,10 +8,8 @@
 
 ## Checklist
 
-- [ ] Tests added/updated (coverage >= 80%)
-- [ ] TypeScript strict mode passes
-- [ ] ESLint passes (zero warnings)
-- [ ] Changeset added (if user-facing change)
-- [ ] No `console.log` in production code
-- [ ] No `any` types
-- [ ] Docs updated (if API change)
+- [ ] `pnpm quality` passes (lint + typecheck + test)
+- [ ] Coverage >= 99%
+- [ ] Changeset added (`pnpm changeset`) if user-facing change
+- [ ] Docs updated if public API changed
+- [ ] No `any` types, no `console.log`

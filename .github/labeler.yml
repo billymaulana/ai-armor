@@ -1,0 +1,15 @@
+core:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/core/**'
+
+nuxt:
+  - changed-files:
+      - any-glob-to-any-file: 'packages/nuxt/**'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: 'docs/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: '.github/workflows/**'
