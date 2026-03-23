@@ -221,6 +221,45 @@ describe('createArmor', () => {
     expect(result.result).toEqual({ model: 'gpt-4o', content: 'ok' })
   })
 
+  it('should return 0 from getDailyCost when no budget configured', async () => {
+    const armor = createArmor({})
+    expect(await armor.getDailyCost()).toBe(0)
+  })
+
+  it('should return 0 from getMonthlyCost when no budget configured', async () => {
+    const armor = createArmor({})
+    expect(await armor.getMonthlyCost()).toBe(0)
+  })
+
+  it('should include perUserMonthly in onWarned callback when per-user monthly limit triggers warn', async () => {
+    const onWarned = vi.fn()
+    const armor = createArmor({
+      budget: {
+        perUserMonthly: 0.001,
+        daily: 100,
+        monthly: 1000,
+        onExceeded: 'warn',
+        onWarned,
+      },
+    })
+
+    await armor.trackCost('gpt-4o', 1000, 500, 'user-1')
+
+    const result = await armor.checkBudget('gpt-4o', { userId: 'user-1' })
+    expect(result.action).toBe('warn')
+    expect(onWarned).toHaveBeenCalledWith(
+      { userId: 'user-1' },
+      expect.objectContaining({ perUserMonthly: expect.any(Number) }),
+    )
+  })
+
+  it('should return infinite remaining from peekRateLimit when no rate limit configured', async () => {
+    const armor = createArmor({})
+    const result = await armor.peekRateLimit({ userId: 'test' })
+    expect(result.remaining).toBe(Number.POSITIVE_INFINITY)
+    expect(result.resetAt).toBe(0)
+  })
+
   it('should use fallback chain when fallback config provided', async () => {
     const armor = createArmor({
       fallback: {

@@ -119,4 +119,10 @@ describe('createRedisAdapter', () => {
     const result = await adapter.getItem('raw-key')
     expect(result).toBe('not-valid-json')
   })
+
+  it('should re-export createRedisAdapter from redis entry point', async () => {
+    const redisExports = await import('../../../src/redis')
+    expect(redisExports.createRedisAdapter).toBeDefined()
+    expect(typeof redisExports.createRedisAdapter).toBe('function')
+  })
 })

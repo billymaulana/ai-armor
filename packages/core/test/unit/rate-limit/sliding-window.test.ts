@@ -382,6 +382,93 @@ describe('createSlidingWindowLimiter', () => {
     expect(r3.allowed).toBe(true)
   })
 
+  describe('peek', () => {
+    it('should return remaining without consuming a request', async () => {
+      const limiter = createSlidingWindowLimiter({
+        strategy: 'sliding-window',
+        rules: [{ key: 'user', limit: 3, window: '1m' }],
+      })
+
+      const ctx = { userId: 'user-1' }
+
+      // Consume one request
+      await limiter.check(ctx)
+
+      // Peek should show 2 remaining without consuming
+      const peek1 = await limiter.peek(ctx)
+      expect(peek1.remaining).toBe(2)
+      expect(peek1.resetAt).toBeGreaterThan(0)
+
+      // Peek again - still 2 remaining (peek doesn't consume)
+      const peek2 = await limiter.peek(ctx)
+      expect(peek2.remaining).toBe(2)
+    })
+
+    it('should return 0 remaining when fully consumed', async () => {
+      const limiter = createSlidingWindowLimiter({
+        strategy: 'sliding-window',
+        rules: [{ key: 'user', limit: 1, window: '1m' }],
+      })
+
+      const ctx = { userId: 'user-1' }
+      await limiter.check(ctx)
+
+      const result = await limiter.peek(ctx)
+      expect(result.remaining).toBe(0)
+      expect(result.resetAt).toBeGreaterThan(0)
+    })
+
+    it('should return 0 remaining with empty rules', async () => {
+      const limiter = createSlidingWindowLimiter({
+        strategy: 'sliding-window',
+        rules: [],
+      })
+
+      const result = await limiter.peek({ userId: 'user-1' })
+      expect(result.remaining).toBe(0)
+      expect(result.resetAt).toBe(0)
+    })
+
+    it('should handle multiple rules and return minimum remaining', async () => {
+      const limiter = createSlidingWindowLimiter({
+        strategy: 'sliding-window',
+        rules: [
+          { key: 'user', limit: 5, window: '1m' },
+          { key: 'ip', limit: 2, window: '1m' },
+        ],
+      })
+
+      const ctx = { userId: 'user-1', ip: '1.2.3.4' }
+      await limiter.check(ctx)
+
+      const result = await limiter.peek(ctx)
+      // ip limit: 2-1=1, user limit: 5-1=4, minimum is 1
+      expect(result.remaining).toBe(1)
+    })
+
+    it('should work with external StorageAdapter', async () => {
+      const storage = new Map<string, unknown>()
+      const adapter = {
+        getItem: async (key: string) => storage.get(key),
+        setItem: async (key: string, value: unknown) => { storage.set(key, value) },
+        removeItem: async (key: string) => { storage.delete(key) },
+      }
+
+      const limiter = createSlidingWindowLimiter({
+        strategy: 'sliding-window',
+        rules: [{ key: 'user', limit: 3, window: '1m' }],
+        store: adapter,
+      })
+
+      const ctx = { userId: 'user-1' }
+      await limiter.check(ctx)
+      await limiter.check(ctx)
+
+      const result = await limiter.peek(ctx)
+      expect(result.remaining).toBe(1)
+    })
+  })
+
   it('should fallback to unknown for custom key when context value is undefined', async () => {
     const limiter = createSlidingWindowLimiter({
       strategy: 'sliding-window',

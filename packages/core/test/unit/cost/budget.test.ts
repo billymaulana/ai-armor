@@ -378,6 +378,27 @@ describe('createCostTracker', () => {
     expect(monthly).toBe(0)
   })
 
+  it('should clear external store entries on reset', async () => {
+    const storage = new Map<string, unknown>()
+    const adapter = {
+      getItem: async (key: string) => storage.get(key),
+      setItem: async (key: string, value: unknown) => { storage.set(key, value) },
+      removeItem: async (key: string) => { storage.delete(key) },
+    }
+
+    const tracker = createCostTracker({
+      daily: 100,
+      onExceeded: 'block',
+      store: adapter,
+    })
+
+    await tracker.trackUsage('gpt-4o', 1000, 500)
+    expect(storage.size).toBeGreaterThan(0)
+
+    await tracker.reset()
+    expect(storage.has('cost-entries')).toBe(false)
+  })
+
   it('should handle external store returning non-array', async () => {
     const adapter = {
       getItem: async () => null,
