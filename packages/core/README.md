@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="ai-armor" width="280" />
+  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="AI ARMOR" width="300" />
 </p>
-
-<h1 align="center">ai-armor</h1>
 
 <p align="center">
   <strong>Production AI toolkit for TypeScript -- rate limiting, cost tracking, fallback, caching, safety guardrails.</strong>

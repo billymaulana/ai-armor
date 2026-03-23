@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="ai-armor" width="280" />
+  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="AI ARMOR" width="300" />
 </p>
 
-<h1 align="center">@ai-armor/nuxt</h1>
+<h3 align="center">@ai-armor/nuxt</h3>
 
 <p align="center">
   <strong>Nuxt module for ai-armor -- production AI toolkit with rate limiting, cost tracking, budget controls, fallback chains, caching, safety guardrails, and observability. Auto-imported composables, server middleware, and admin API routes for Nuxt 3/4.</strong>
