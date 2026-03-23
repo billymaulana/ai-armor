@@ -12,7 +12,7 @@
   <a href="https://www.npmjs.com/package/ai-armor"><img src="https://img.shields.io/npm/v/ai-armor?color=yellow&label=npm" alt="npm"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT"></a>
   <a href="https://github.com/billymaulana/ai-armor/actions/workflows/ci.yml"><img src="https://github.com/billymaulana/ai-armor/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <img src="https://img.shields.io/badge/coverage-96.6%25-brightgreen" alt="96.6%">
+  <img src="https://img.shields.io/badge/coverage-99.6%25-brightgreen" alt="96.6%">
   <a href="https://github.com/billymaulana/ai-armor"><img src="https://img.shields.io/github/stars/billymaulana/ai-armor?style=social" alt="stars"></a>
 </p>
 

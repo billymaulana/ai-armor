@@ -11,7 +11,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/ai-armor"><img src="https://img.shields.io/npm/v/ai-armor?color=yellow&label=npm" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/coverage-96.6%25-brightgreen" alt="Coverage: 96.6%">
+  <img src="https://img.shields.io/badge/coverage-99.6%25-brightgreen" alt="Coverage: 96.6%">
   <a href="https://github.com/billymaulana/ai-armor"><img src="https://img.shields.io/github/stars/billymaulana/ai-armor?style=social" alt="GitHub stars"></a>
 </p>
 
