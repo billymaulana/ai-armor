@@ -1,4 +1,4 @@
-import type { ArmorRequest, CacheConfig } from '../types'
+import type { ArmorRequest, ExactCacheConfig } from '../types'
 
 interface CacheEntry {
   value: unknown
@@ -11,7 +11,7 @@ interface CacheEntry {
  * Map preserves insertion order -- delete+reinsert moves to end.
  * First entry is always the LRU candidate.
  */
-export function createExactCache(config: CacheConfig) {
+export function createExactCache(config: ExactCacheConfig) {
   const cache = new Map<string, CacheEntry>()
 
   function serializeRequest(request: ArmorRequest): string {
