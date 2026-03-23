@@ -32,11 +32,11 @@ describe('aiArmorMiddleware', () => {
         enabled: true,
         strategy: 'exact',
         ttl: 3600,
-        driver: 'memory',
+
       },
     })
 
-    armor.setCachedResponse(
+    await armor.setCachedResponse(
       { model: 'gpt-4o', messages: [{ content: 'hello' }] },
       { content: 'cached' },
     )
@@ -109,7 +109,7 @@ describe('aiArmorMiddleware', () => {
         enabled: true,
         strategy: 'exact',
         ttl: 3600,
-        driver: 'memory',
+
       },
       logging: {
         enabled: true,
@@ -117,7 +117,7 @@ describe('aiArmorMiddleware', () => {
       },
     })
 
-    armor.setCachedResponse(
+    await armor.setCachedResponse(
       { model: 'gpt-4o', messages: [{ content: 'hello' }] },
       { content: 'cached!' },
     )
@@ -283,7 +283,7 @@ describe('aiArmorMiddleware', () => {
         enabled: true,
         strategy: 'exact',
         ttl: 3600,
-        driver: 'memory',
+
       },
       logging: {
         enabled: true,
@@ -305,7 +305,7 @@ describe('aiArmorMiddleware', () => {
       params: {},
     })
 
-    const cached = armor.getCachedResponse({ model: 'gpt-4o', messages: [{ content: 'test' }] })
+    const cached = await armor.getCachedResponse({ model: 'gpt-4o', messages: [{ content: 'test' }] })
     expect(cached).toBeUndefined()
   })
 
@@ -441,7 +441,7 @@ describe('aiArmorMiddleware', () => {
         enabled: true,
         strategy: 'exact',
         ttl: 3600,
-        driver: 'memory',
+
       },
       logging: {
         enabled: true,

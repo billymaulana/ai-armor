@@ -62,7 +62,7 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 3600,
-    driver: 'memory',
+
     maxSize: 1000,
   },
   routing: {
@@ -153,7 +153,7 @@ const armor = createArmor({
     onExceeded: 'downgrade-model',
     downgradeMap: { 'gpt-4o': 'gpt-4o-mini' },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   logging: { enabled: true, include: ['model', 'tokens', 'cost', 'latency', 'cached'] },
 })
 
@@ -189,7 +189,7 @@ const armor = createArmor({
     ],
   },
   budget: { daily: 200, onExceeded: 'block' },
-  cache: { enabled: true, strategy: 'exact', ttl: 1800, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 1800 },
   routing: {
     aliases: { fast: 'gpt-4o-mini', smart: 'gpt-4o' },
   },
@@ -242,7 +242,7 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 3600,
-    driver: 'memory',
+
   },
 })
 ```

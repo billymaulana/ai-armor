@@ -10,3 +10,10 @@ export interface ArmorStatusResponse {
   rateLimitRemaining: number
   rateLimitResetAt: string | null
 }
+
+export interface ArmorSafetyResponse {
+  allowed: boolean
+  blocked: boolean
+  reason: string | null
+  details: string[]
+}

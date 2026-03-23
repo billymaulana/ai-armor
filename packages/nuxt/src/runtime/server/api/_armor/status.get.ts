@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (expected) {
     const provided = getRequestHeader(event, 'x-armor-admin-secret')
     if (provided !== expected) {
-      throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+      throw createError({ statusCode: 403, statusMessage: 'Forbidden', statusText: 'Forbidden' })
     }
   }
 
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
     apiKey: getRequestHeader(event, 'x-api-key'),
   }
 
-  const rateLimitResult = await armor.checkRateLimit(ctx)
+  const rateLimitResult = await armor.peekRateLimit(ctx)
 
   return {
     healthy: true,
