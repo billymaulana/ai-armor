@@ -3,6 +3,9 @@ import type { ArmorInstance } from 'ai-armor'
 let _armor: ArmorInstance | undefined
 
 export function initArmor(instance: ArmorInstance): void {
+  if (_armor) {
+    console.warn('[ai-armor] initArmor() called more than once — replacing existing instance. This may indicate duplicate plugin registration.')
+  }
   _armor = instance
 }
 

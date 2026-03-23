@@ -90,7 +90,7 @@ const armor = createArmor({
     onExceeded: 'downgrade-model',
     downgradeMap: {
       'gpt-4o': 'gpt-4o-mini',
-      'claude-sonnet-4-6': 'claude-haiku-3.5',
+      'claude-sonnet-4-6': 'claude-haiku-4-5',
     },
   },
 

@@ -124,8 +124,11 @@ export interface FallbackResult<T = unknown> {
 export interface ArmorInstance {
   config: ArmorConfig
   checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
+  peekRateLimit: (ctx: ArmorContext) => Promise<{ remaining: number, resetAt: number }>
   trackCost: (model: string, inputTokens: number, outputTokens: number, userId?: string) => Promise<void>
   checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string | undefined }>
+  getDailyCost: (userId?: string) => Promise<number>
+  getMonthlyCost: (userId?: string) => Promise<number>
   resolveModel: (model: string) => string
   getCachedResponse: (request: ArmorRequest) => unknown | undefined
   setCachedResponse: (request: ArmorRequest, response: unknown) => void

@@ -52,10 +52,31 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
       return rateLimiter.check(ctx)
     },
 
+    async peekRateLimit(ctx: ArmorContext): Promise<{ remaining: number, resetAt: number }> {
+      if (!rateLimiter) {
+        return { remaining: Number.POSITIVE_INFINITY, resetAt: 0 }
+      }
+      return rateLimiter.peek(ctx)
+    },
+
     async trackCost(model: string, inputTokens: number, outputTokens: number, userId?: string): Promise<void> {
       if (costTracker) {
         await costTracker.trackUsage(model, inputTokens, outputTokens, userId)
       }
+    },
+
+    async getDailyCost(userId?: string): Promise<number> {
+      if (!costTracker) {
+        return 0
+      }
+      return costTracker.getDailyCost(userId)
+    },
+
+    async getMonthlyCost(userId?: string): Promise<number> {
+      if (!costTracker) {
+        return 0
+      }
+      return costTracker.getMonthlyCost(userId)
     },
 
     async checkBudget(model: string, ctx: ArmorContext) {

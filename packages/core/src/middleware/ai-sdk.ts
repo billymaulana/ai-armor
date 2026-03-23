@@ -200,25 +200,31 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
             }
           },
           async flush() {
-            const latency = Date.now() - startTime
-            await armor.trackCost(model, inputTokens, outputTokens, context.userId)
-            const logEntry: ArmorLog = {
-              id: crypto.randomUUID(),
-              timestamp: Date.now(),
-              model,
-              provider: getProvider(model),
-              inputTokens,
-              outputTokens,
-              cost: armor.estimateCost(model, inputTokens, outputTokens),
-              latency,
-              cached: false,
-              fallback: false,
-              rateLimited: false,
+            try {
+              const latency = Date.now() - startTime
+              await armor.trackCost(model, inputTokens, outputTokens, context.userId)
+              const logEntry: ArmorLog = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                model,
+                provider: getProvider(model),
+                inputTokens,
+                outputTokens,
+                cost: armor.estimateCost(model, inputTokens, outputTokens),
+                latency,
+                cached: false,
+                fallback: false,
+                rateLimited: false,
+              }
+              if (context.userId !== undefined) {
+                logEntry.userId = context.userId
+              }
+              await armor.log(logEntry)
             }
-            if (context.userId !== undefined) {
-              logEntry.userId = context.userId
+            catch {
+              // Swallow tracking/logging errors -- stream delivery must not be corrupted
+              // by post-stream bookkeeping failures (e.g. external store timeout)
             }
-            await armor.log(logEntry)
           },
         }),
       )

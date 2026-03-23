@@ -158,6 +158,34 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
     }
   }
 
+  async function peek(ctx: ArmorContext): Promise<{ remaining: number, resetAt: number }> {
+    const now = Date.now()
+    let minRemaining = Number.POSITIVE_INFINITY
+    let earliestReset = 0
+
+    for (const rule of config.rules) {
+      const resolvedKey = resolveKey(config, ctx, rule.key)
+      const storeKey = getStoreKey(rule.key, resolvedKey)
+      const windowMs = parseWindow(rule.window)
+      const windowStart = now - windowMs
+
+      const entries = (await getEntries(storeKey)).filter(e => e.timestamp > windowStart)
+      const remaining = Math.max(0, rule.limit - entries.length)
+
+      if (remaining < minRemaining) {
+        minRemaining = remaining
+        if (entries.length > 0) {
+          earliestReset = entries[0]!.timestamp + windowMs
+        }
+      }
+    }
+
+    return {
+      remaining: minRemaining === Number.POSITIVE_INFINITY ? 0 : minRemaining,
+      resetAt: earliestReset,
+    }
+  }
+
   async function reset(): Promise<void> {
     store.entries.clear()
     // Note: external store entries are not cleared here because StorageAdapter
@@ -167,6 +195,7 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
 
   return {
     check,
+    peek,
     reset,
   }
 }

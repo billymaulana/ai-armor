@@ -13,30 +13,20 @@ export default defineEventHandler(async (event) => {
   }
 
   const armor = useArmorInstance()
+
+  // Read cost data from CostTracker (source of truth), not log buffer.
+  // CostTracker persists across external stores and survives log rotation.
+  const todayCost = await armor.getDailyCost()
+  const monthCost = await armor.getMonthlyCost()
+
+  // Cost history is still derived from logs (best-effort, for dashboard charts)
   const logs = armor.getLogs()
-
-  let todayCost = 0
-  let monthCost = 0
-  const startOfDay = new Date()
-  startOfDay.setUTCHours(0, 0, 0, 0)
-  const startOfMonth = new Date()
-  startOfMonth.setUTCDate(1)
-  startOfMonth.setUTCHours(0, 0, 0, 0)
-
   const costHistory: Array<{ date: string, cost: number }> = []
   const dailyCosts = new Map<string, number>()
 
   for (const log of logs) {
-    const logDate = new Date(log.timestamp)
-    const dateKey = logDate.toISOString().slice(0, 10)
+    const dateKey = new Date(log.timestamp).toISOString().slice(0, 10)
     dailyCosts.set(dateKey, (dailyCosts.get(dateKey) ?? 0) + log.cost)
-
-    if (log.timestamp >= startOfDay.getTime()) {
-      todayCost += log.cost
-    }
-    if (log.timestamp >= startOfMonth.getTime()) {
-      monthCost += log.cost
-    }
   }
 
   for (const [date, cost] of dailyCosts) {
