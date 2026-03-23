@@ -6,7 +6,7 @@ export default defineConfig({
   base: '/ai-armor/',
   appearance: 'dark',
   head: [
-    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/ai-armor/favicon.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/ai-armor/favicon.png' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
     ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap', rel: 'stylesheet' }],
@@ -16,10 +16,7 @@ export default defineConfig({
     ['meta', { property: 'og:description', content: 'Rate limiting, cost tracking, caching, model routing, and safety guardrails for AI APIs. Works with OpenAI, Anthropic, Google, and 15+ providers.' }],
   ],
   themeConfig: {
-    logo: {
-      light: '/logo-text-dark.svg',
-      dark: '/logo-text.svg',
-    },
+    logo: '/logo-small.png',
     siteTitle: false,
     search: {
       provider: 'local',
