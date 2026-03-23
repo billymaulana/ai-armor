@@ -5,7 +5,7 @@
 <h1 align="center">@ai-armor/nuxt</h1>
 
 <p align="center">
-  <strong>Nuxt module for ai-armor -- auto-imported composables, server middleware, and admin API routes.</strong>
+  <strong>Nuxt module for ai-armor -- production AI toolkit with rate limiting, cost tracking, budget controls, fallback chains, caching, safety guardrails, and observability. Auto-imported composables, server middleware, and admin API routes for Nuxt 3/4.</strong>
 </p>
 
 <p align="center">
