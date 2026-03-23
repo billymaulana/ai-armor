@@ -51,9 +51,9 @@ describe('createArmor', () => {
     expect(armor.getLogs()).toEqual([])
   })
 
-  it('should return undefined cache when no cache configured', () => {
+  it('should return undefined cache when no cache configured', async () => {
     const armor = createArmor({})
-    expect(armor.getCachedResponse({ model: 'gpt-4o', messages: [] })).toBeUndefined()
+    expect(await armor.getCachedResponse({ model: 'gpt-4o', messages: [] })).toBeUndefined()
   })
 
   it('should estimate cost for known models', () => {
@@ -96,23 +96,22 @@ describe('createArmor', () => {
     expect(result.action).toBe('block')
   })
 
-  it('should integrate caching', () => {
+  it('should integrate caching', async () => {
     const armor = createArmor({
       cache: {
         enabled: true,
         strategy: 'exact',
         ttl: 3600,
-        driver: 'memory',
       },
     })
 
     const req = { model: 'gpt-4o', messages: [{ content: 'hello' }] }
 
-    expect(armor.getCachedResponse(req)).toBeUndefined()
+    expect(await armor.getCachedResponse(req)).toBeUndefined()
 
-    armor.setCachedResponse(req, { content: 'response' })
+    await armor.setCachedResponse(req, { content: 'response' })
 
-    expect(armor.getCachedResponse(req)).toEqual({ content: 'response' })
+    expect(await armor.getCachedResponse(req)).toEqual({ content: 'response' })
   })
 
   it('should fire onWarned callback when budget warn action triggers', async () => {
@@ -157,11 +156,11 @@ describe('createArmor', () => {
     )
   })
 
-  it('should not set cache when cache is not configured', () => {
+  it('should not set cache when cache is not configured', async () => {
     const armor = createArmor({})
     // Should not throw
-    armor.setCachedResponse({ model: 'gpt-4o', messages: [] }, { content: 'test' })
-    expect(armor.getCachedResponse({ model: 'gpt-4o', messages: [] })).toBeUndefined()
+    await armor.setCachedResponse({ model: 'gpt-4o', messages: [] }, { content: 'test' })
+    expect(await armor.getCachedResponse({ model: 'gpt-4o', messages: [] })).toBeUndefined()
   })
 
   it('should not log when logging is not configured', async () => {
