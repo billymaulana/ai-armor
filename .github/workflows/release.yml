@@ -30,6 +30,7 @@ jobs:
       - run: pnpm build
 
       - name: Create Release PR or Publish
+        if: env.HAS_NPM_TOKEN == 'true'
         uses: changesets/action@v1
         with:
           publish: pnpm release
@@ -37,3 +38,10 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+
+      - name: Skip publish (no NPM_TOKEN)
+        if: env.HAS_NPM_TOKEN != 'true'
+        env:
+          HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+        run: echo "Skipping publish -- NPM_TOKEN not configured. Set it in repo secrets to enable."
