@@ -26,8 +26,8 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm quality
       - run: pnpm build
+      - run: pnpm quality
 
       - name: Create Release PR or Publish
         if: env.HAS_NPM_TOKEN == 'true'
