@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@3/schema.json",
-  "changelog": "@changesets/changelog-github",
+  "changelog": ["@changesets/changelog-github", { "repo": "billymaulana/ai-armor" }],
   "commit": false,
   "fixed": [],
   "linked": [["ai-armor", "@ai-armor/nuxt"]],
