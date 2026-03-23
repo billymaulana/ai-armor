@@ -151,8 +151,8 @@ import { createRedisAdapter } from 'ai-armor/redis'
 
 const adapter = createRedisAdapter(new Redis(), { prefix: 'myapp:' })
 const armor = createArmor({
-  rateLimit: { ..., store: adapter },
-  budget: { ..., store: adapter },
+  rateLimit: { strategy: 'sliding-window', rules: [/* ... */], store: adapter },
+  budget: { daily: 50, onExceeded: 'block', store: adapter },
 })
 ```
 
