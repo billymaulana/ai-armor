@@ -13,13 +13,17 @@ import type {
   ArmorRequest,
   BudgetConfig,
   CacheConfig,
+  ExactCacheConfig,
   FallbackConfig,
+  FallbackResult,
   LoggingConfig,
   RateLimitConfig,
   RateLimitResult,
   RateLimitRule,
   RoutingConfig,
+  SafetyCheckResult,
   SafetyConfig,
+  SemanticCacheConfig,
   StorageAdapter,
 } from 'ai-armor'
 ```
@@ -60,7 +64,7 @@ Configuration for rate limiting.
 
 ```ts
 interface RateLimitConfig {
-  strategy: 'sliding-window' | 'fixed-window' | 'token-bucket'
+  strategy: 'sliding-window'
   rules: RateLimitRule[]
   store?: 'memory' | 'redis' | StorageAdapter
   keyResolver?: (ctx: ArmorContext, ruleKey: string) => string
@@ -70,7 +74,7 @@ interface RateLimitConfig {
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `strategy` | `'sliding-window' \| 'fixed-window' \| 'token-bucket'` | Yes | Rate limiting algorithm. Currently `'sliding-window'` is fully implemented. |
+| `strategy` | `'sliding-window'` | Yes | Rate limiting algorithm. Currently `'sliding-window'` is fully implemented. |
 | `rules` | [`RateLimitRule[]`](#ratelimitrule) | Yes | Array of rate limit rules. All rules must pass for a request to be allowed. |
 | `store` | `'memory' \| 'redis' \| StorageAdapter` | No | Storage backend. Default: in-memory. Pass a [`StorageAdapter`](#storageadapter) for shared state across instances. |
 | `keyResolver` | `(ctx: ArmorContext, ruleKey: string) => string` | No | Custom function to resolve rate limit keys from context. Overrides default key resolution. |
@@ -127,6 +131,7 @@ interface BudgetConfig {
   daily?: number
   monthly?: number
   perUser?: number
+  perUserMonthly?: number
   onExceeded: 'block' | 'warn' | 'downgrade-model'
   downgradeMap?: Record<string, string>
   store?: 'memory' | 'redis' | StorageAdapter
@@ -134,7 +139,9 @@ interface BudgetConfig {
     daily: number
     monthly: number
     perUserDaily?: number
+    perUserMonthly?: number
   }) => void
+  onUnknownModel?: (model: string) => void
 }
 ```
 
@@ -143,10 +150,12 @@ interface BudgetConfig {
 | `daily` | `number` | No | Maximum daily spend in USD. Resets at midnight (server local time). |
 | `monthly` | `number` | No | Maximum monthly spend in USD. Resets on the 1st of each month. |
 | `perUser` | `number` | No | Maximum daily spend per user in USD. Requires `ctx.userId` to be set. |
+| `perUserMonthly` | `number` | No | Maximum monthly spend per user in USD. Requires `ctx.userId` to be set. |
 | `onExceeded` | `'block' \| 'warn' \| 'downgrade-model'` | Yes | Action to take when a budget limit is exceeded. |
 | `downgradeMap` | `Record<string, string>` | No | Maps expensive models to cheaper alternatives. Used when `onExceeded` is `'downgrade-model'`. |
 | `store` | `'memory' \| 'redis' \| StorageAdapter` | No | Storage backend for cost data. Default: in-memory. |
-| `onWarned` | `function` | No | Callback fired when `onExceeded` is `'warn'` and a budget is exceeded. Receives current spend totals. |
+| `onWarned` | `function` | No | Callback fired when `onExceeded` is `'warn'` and a budget is exceeded. Receives current spend totals including `perUserMonthly`. |
+| `onUnknownModel` | `(model: string) => void` | No | Callback fired when a model is not found in the pricing table. |
 
 ---
 
@@ -176,10 +185,16 @@ interface FallbackConfig {
 
 ## CacheConfig {#cacheconfig}
 
-Configuration for response caching.
+Configuration for response caching. This is a union type -- use `strategy: 'exact'` for exact-match caching or `strategy: 'semantic'` for embedding-based similarity caching.
 
 ```ts
-interface CacheConfig {
+type CacheConfig = ExactCacheConfig | SemanticCacheConfig
+```
+
+### ExactCacheConfig {#exactcacheconfig}
+
+```ts
+interface ExactCacheConfig {
   enabled: boolean
   strategy: 'exact'
   ttl: number
@@ -191,9 +206,33 @@ interface CacheConfig {
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `enabled` | `boolean` | Yes | Enable or disable caching. |
-| `strategy` | `'exact'` | Yes | Cache matching strategy. Currently only exact-match is supported. |
+| `strategy` | `'exact'` | Yes | Exact-match cache strategy. |
 | `ttl` | `number` | Yes | Time-to-live for cache entries, in seconds. |
 | `maxSize` | `number` | No | Maximum number of cache entries. When exceeded, LRU entries are evicted. |
+| `keyFn` | `(request: ArmorRequest) => string` | No | Custom function to generate cache keys. Default serializes model + messages + temperature + tools. |
+
+### SemanticCacheConfig {#semanticcacheconfig}
+
+```ts
+interface SemanticCacheConfig {
+  enabled: boolean
+  strategy: 'semantic'
+  ttl: number
+  maxSize?: number
+  embeddingFn: (text: string) => Promise<number[]>
+  similarityThreshold?: number
+  keyFn?: (request: ArmorRequest) => string
+}
+```
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `enabled` | `boolean` | Yes | Enable or disable caching. |
+| `strategy` | `'semantic'` | Yes | Semantic similarity cache strategy. |
+| `ttl` | `number` | Yes | Time-to-live for cache entries, in seconds. |
+| `maxSize` | `number` | No | Maximum number of cache entries. When exceeded, LRU entries are evicted. |
+| `embeddingFn` | `(text: string) => Promise<number[]>` | Yes | Function that returns an embedding vector for the given text. Used for similarity comparison. |
+| `similarityThreshold` | `number` | No | Minimum cosine similarity (0-1) to consider a cache hit. Default: `0.95`. |
 | `keyFn` | `(request: ArmorRequest) => string` | No | Custom function to generate cache keys. Default serializes model + messages + temperature + tools. |
 
 ---
@@ -356,22 +395,68 @@ The object returned by `createArmor()`. Contains all configured protections and 
 interface ArmorInstance {
   config: ArmorConfig
   checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
+  peekRateLimit: (ctx: ArmorContext) => Promise<{ remaining: number, resetAt: number }>
   trackCost: (model: string, inputTokens: number, outputTokens: number, userId?: string) => Promise<void>
-  checkBudget: (model: string, ctx: ArmorContext) => Promise<{
-    allowed: boolean
-    action: string
-    suggestedModel?: string
-  }>
+  checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string }>
+  getDailyCost: (userId?: string) => Promise<number>
+  getMonthlyCost: (userId?: string) => Promise<number>
   resolveModel: (model: string) => string
-  getCachedResponse: (request: ArmorRequest) => unknown | undefined
-  setCachedResponse: (request: ArmorRequest, response: unknown) => void
+  getCachedResponse: (request: ArmorRequest) => Promise<unknown | undefined>
+  setCachedResponse: (request: ArmorRequest, response: unknown) => Promise<void>
   log: (entry: ArmorLog) => Promise<void>
   getLogs: () => ArmorLog[]
   estimateCost: (model: string, inputTokens: number, outputTokens: number) => number
+  getProvider: (model: string) => string
+  checkSafety: (request: ArmorRequest, ctx: ArmorContext) => SafetyCheckResult
+  executeFallback: <T>(request: ArmorRequest, handler: (model: string) => Promise<T>) => Promise<FallbackResult<T>>
 }
 ```
 
 See [createArmor API Reference](/api/create-armor#methods) for detailed method documentation.
+
+---
+
+## SafetyCheckResult {#safetycheckresult}
+
+Result from `armor.checkSafety()`.
+
+```ts
+interface SafetyCheckResult {
+  allowed: boolean
+  blocked: boolean
+  reason: string | null
+  details: string[]
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `allowed` | `boolean` | `true` if the request passed all safety checks. |
+| `blocked` | `boolean` | `true` if the request was blocked. |
+| `reason` | `string \| null` | Primary reason for blocking, or `null` if allowed. |
+| `details` | `string[]` | Array of all triggered safety check details. |
+
+---
+
+## FallbackResult {#fallbackresult}
+
+Result from `armor.executeFallback()`.
+
+```ts
+interface FallbackResult<T = unknown> {
+  result: T
+  model: string
+  attempts: number
+  fallbackUsed: boolean
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `result` | `T` | The response from the successful model call. |
+| `model` | `string` | The model that ultimately succeeded. |
+| `attempts` | `number` | Total number of attempts made. |
+| `fallbackUsed` | `boolean` | `true` if a fallback model was used instead of the primary. |
 
 ---
 

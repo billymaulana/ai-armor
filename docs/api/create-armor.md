@@ -38,7 +38,7 @@ interface ArmorConfig {
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `strategy` | `'sliding-window' \| 'fixed-window' \| 'token-bucket'` | Yes | Rate limiting algorithm |
+| `strategy` | `'sliding-window'` | Yes | Rate limiting algorithm |
 | `rules` | `RateLimitRule[]` | Yes | Array of rate limit rules |
 | `store` | `'memory' \| 'redis' \| StorageAdapter` | No | Storage backend. Default: in-memory |
 | `keyResolver` | `(ctx: ArmorContext, ruleKey: string) => string` | No | Custom key resolution |
@@ -63,10 +63,12 @@ See [Rate Limiting guide](/guide/rate-limiting) for details.
 | `daily` | `number` | No | Maximum daily spend in USD |
 | `monthly` | `number` | No | Maximum monthly spend in USD |
 | `perUser` | `number` | No | Maximum daily spend per user in USD |
+| `perUserMonthly` | `number` | No | Maximum monthly spend per user in USD |
 | `onExceeded` | `'block' \| 'warn' \| 'downgrade-model'` | Yes | Action when budget exceeded |
 | `downgradeMap` | `Record<string, string>` | No | Model downgrade mapping |
 | `store` | `'memory' \| 'redis' \| StorageAdapter` | No | Storage backend. Default: in-memory |
-| `onWarned` | `(ctx: ArmorContext, budget: { daily: number, monthly: number, perUserDaily?: number }) => void` | No | Callback when budget warning fires |
+| `onWarned` | `(ctx: ArmorContext, budget: { daily: number, monthly: number, perUserDaily?: number, perUserMonthly?: number }) => void` | No | Callback when budget warning fires |
+| `onUnknownModel` | `(model: string) => void` | No | Callback when a model not in the pricing database is encountered |
 
 See [Cost Tracking guide](/guide/cost-tracking) for details.
 
@@ -89,10 +91,19 @@ See [Cost Tracking guide](/guide/cost-tracking) for details.
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `enabled` | `boolean` | Yes | Enable/disable caching |
-| `strategy` | `'exact'` | Yes | Cache matching strategy |
+| `strategy` | `'exact' \| 'semantic'` | Yes | Cache matching strategy |
 | `ttl` | `number` | Yes | Time-to-live in seconds |
 | `maxSize` | `number` | No | Maximum entries (LRU eviction) |
 | `keyFn` | `(request: ArmorRequest) => string` | No | Custom cache key generator |
+
+> **Note:** Semantic strategy requires additional fields (`embeddingFn`, `similarityThreshold`).
+
+**Semantic cache additional fields:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `embeddingFn` | `(text: string) => Promise<number[]>` | Yes (semantic) | User-provided embedding function |
+| `similarityThreshold` | `number` | No | Minimum cosine similarity for cache hit (default: 0.92) |
 
 See [Caching guide](/guide/caching) for details.
 
@@ -141,14 +152,20 @@ See [Logging guide](/guide/logging) for details.
 interface ArmorInstance {
   config: ArmorConfig
   checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
+  peekRateLimit: (ctx: ArmorContext) => Promise<{ remaining: number, resetAt: number }>
   trackCost: (model: string, inputTokens: number, outputTokens: number, userId?: string) => Promise<void>
   checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string }>
+  getDailyCost: (userId?: string) => Promise<number>
+  getMonthlyCost: (userId?: string) => Promise<number>
   resolveModel: (model: string) => string
-  getCachedResponse: (request: ArmorRequest) => unknown | undefined
-  setCachedResponse: (request: ArmorRequest, response: unknown) => void
+  getCachedResponse: (request: ArmorRequest) => Promise<unknown | undefined>
+  setCachedResponse: (request: ArmorRequest, response: unknown) => Promise<void>
   log: (entry: ArmorLog) => Promise<void>
   getLogs: () => ArmorLog[]
   estimateCost: (model: string, inputTokens: number, outputTokens: number) => number
+  getProvider: (model: string) => string
+  checkSafety: (request: ArmorRequest, ctx: ArmorContext) => SafetyCheckResult
+  executeFallback: <T>(request: ArmorRequest, handler: (model: string) => Promise<T>) => Promise<FallbackResult<T>>
 }
 ```
 
@@ -272,7 +289,7 @@ const request = {
   model: 'gpt-4o',
   messages: [{ role: 'user', content: 'Hello' }],
 }
-const cached = armor.getCachedResponse(request)
+const cached = await armor.getCachedResponse(request)
 if (cached) {
   return cached // Skip API call
 }
@@ -284,7 +301,7 @@ if (cached) {
 |---|---|---|
 | `request` | `ArmorRequest` | Request to look up |
 
-**Returns:** `unknown | undefined` -- The cached response, or `undefined` on cache miss.
+**Returns:** `Promise<unknown | undefined>` -- The cached response, or `undefined` on cache miss.
 
 ---
 
@@ -293,7 +310,7 @@ if (cached) {
 Store a response in the cache.
 
 ```ts
-armor.setCachedResponse(request, response)
+await armor.setCachedResponse(request, response)
 ```
 
 **Parameters:**
@@ -303,7 +320,7 @@ armor.setCachedResponse(request, response)
 | `request` | `ArmorRequest` | The request key |
 | `response` | `unknown` | The response to cache |
 
-**Returns:** `void`
+**Returns:** `Promise<void>`
 
 ---
 
@@ -373,25 +390,183 @@ console.log(`Estimated: $${cost.toFixed(6)}`)
 
 ---
 
+### peekRateLimit(ctx)
+
+Check rate limit status without recording a request. Useful for UI indicators.
+
+```ts
+const status = await armor.peekRateLimit({ userId: 'user-123' })
+if (status.remaining < 5) {
+  showWarning('Approaching rate limit')
+}
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|---|---|---|
+| `ctx` | `ArmorContext` | Request context |
+
+**Returns:** `Promise<{ remaining: number, resetAt: number }>`
+
+---
+
+### getDailyCost(userId?)
+
+Get current daily spend.
+
+```ts
+const daily = await armor.getDailyCost('user-123')
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|---|---|---|
+| `userId` | `string?` | Optional user ID for per-user cost |
+
+**Returns:** `Promise<number>` -- Cost in USD.
+
+---
+
+### getMonthlyCost(userId?)
+
+Get current monthly spend.
+
+```ts
+const monthly = await armor.getMonthlyCost('user-123')
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|---|---|---|
+| `userId` | `string?` | Optional user ID for per-user cost |
+
+**Returns:** `Promise<number>` -- Cost in USD.
+
+---
+
+### getProvider(model)
+
+Get the provider name for a model from the pricing database.
+
+```ts
+const provider = armor.getProvider('gpt-4o')
+// => 'openai'
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|---|---|---|
+| `model` | `string` | Model name |
+
+**Returns:** `string` -- Provider name, or `'unknown'` if model not found.
+
+---
+
+### checkSafety(request, ctx)
+
+Run safety checks on a request without going through the full pipeline.
+
+```ts
+const result = armor.checkSafety(
+  { model: 'gpt-4o', messages: [{ role: 'user', content: userInput }] },
+  { userId: 'user-123' }
+)
+if (result.blocked) {
+  throw new Error(`Blocked: ${result.reason}`)
+}
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|---|---|---|
+| `request` | `ArmorRequest` | Request to check |
+| `ctx` | `ArmorContext` | Request context |
+
+**Returns:** `SafetyCheckResult`
+
+```ts
+interface SafetyCheckResult {
+  allowed: boolean
+  blocked: boolean
+  reason: string | null
+  details: string[]
+}
+```
+
+---
+
+### executeFallback(request, handler)
+
+Execute a request through the fallback chain.
+
+```ts
+const result = await armor.executeFallback(
+  { model: 'gpt-4o', messages: [{ role: 'user', content: 'Hello' }] },
+  async (model) => {
+    return await callAI(model, messages)
+  }
+)
+if (result.fallbackUsed) {
+  console.warn(`Used fallback model: ${result.model}`)
+}
+```
+
+**Parameters:**
+
+| Name | Type | Description |
+|---|---|---|
+| `request` | `ArmorRequest` | Request with primary model |
+| `handler` | `(model: string) => Promise<T>` | Function that calls the AI provider |
+
+**Returns:** `Promise<FallbackResult<T>>`
+
+```ts
+interface FallbackResult<T> {
+  result: T
+  model: string
+  attempts: number
+  fallbackUsed: boolean
+}
+```
+
+---
+
 ## Additional Exports
 
 The `ai-armor` package also exports these pricing utilities:
 
 ```ts
 import {
+  addModel,
   calculateCost,
+  createPricingRegistry,
   getAllModels,
   getModelPricing,
   getProvider,
+  registerModels,
+  removeModel,
+  resetPricing,
+  updateModel,
 } from 'ai-armor'
 ```
 
 | Function | Signature | Description |
 |---|---|---|
-| `calculateCost` | `(model: string, inputTokens: number, outputTokens: number) => number` | Calculate cost in USD |
-| `getModelPricing` | `(model: string) => ModelPricing \| undefined` | Get pricing info for a model |
+| `calculateCost` | `(model, inputTokens, outputTokens) => number` | Calculate cost in USD |
+| `getModelPricing` | `(model) => ModelPricing \| undefined` | Get pricing info for a model |
 | `getAllModels` | `() => string[]` | List all models in the pricing database |
-| `getProvider` | `(model: string) => string` | Get the provider name for a model |
+| `getProvider` | `(model) => string` | Get the provider name for a model |
+| `addModel` | `(pricing: ModelPricing) => void` | Add a custom model to the pricing registry |
+| `updateModel` | `(model, updates) => void` | Update pricing for an existing model |
+| `removeModel` | `(model) => void` | Remove a model from the registry |
+| `resetPricing` | `() => void` | Reset all custom models, restore defaults |
+| `registerModels` | `(models: ModelPricing[]) => void` | Bulk add multiple models |
+| `createPricingRegistry` | `(initialModels?) => PricingRegistry` | Create an isolated pricing instance |
 
 ## Related
 

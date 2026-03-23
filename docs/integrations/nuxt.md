@@ -83,7 +83,7 @@ Track real-time cost data in your UI:
 
 ```vue
 <script setup lang="ts">
-const { todayCost, monthCost, budget, isNearLimit, costHistory } = useArmorCost()
+const { todayCost, monthCost, budget, isNearLimit, costHistory, refresh, pending, error } = useArmorCost()
 </script>
 
 <template>
@@ -112,6 +112,9 @@ const { todayCost, monthCost, budget, isNearLimit, costHistory } = useArmorCost(
 | `budget` | `Ref<{ daily: number, monthly: number }>` | Configured budget limits |
 | `isNearLimit` | `Ref<boolean>` | Whether spend is approaching the limit |
 | `costHistory` | `Ref<Array<{ date: string, cost: number }>>` | Historical cost data |
+| `refresh` | `() => Promise<void>` | Re-fetch cost data from the server |
+| `pending` | `Ref<boolean>` | Whether a fetch is in progress |
+| `error` | `Ref<Error \| null>` | Error from the last fetch attempt |
 
 ### useArmorStatus
 
@@ -119,16 +122,20 @@ Monitor the health and status of your AI endpoints:
 
 ```vue
 <script setup lang="ts">
-const { activeProvider, isHealthy, fallbackActive, rateLimitRemaining } = useArmorStatus()
+const { isHealthy, rateLimitRemaining, rateLimitResetAt, refresh, pending, error } = useArmorStatus()
 </script>
 
 <template>
   <div class="status-panel">
     <span :class="isHealthy ? 'text-green' : 'text-red'">
-      {{ activeProvider }} -- {{ isHealthy ? 'Healthy' : 'Degraded' }}
+      {{ isHealthy ? 'Healthy' : 'Degraded' }}
     </span>
-    <span v-if="fallbackActive" class="text-yellow">Fallback active</span>
     <span>Rate limit remaining: {{ rateLimitRemaining }}</span>
+    <span v-if="rateLimitResetAt">Resets at: {{ rateLimitResetAt }}</span>
+    <button :disabled="pending" @click="refresh">
+      Refresh
+    </button>
+    <span v-if="error" class="text-red">{{ error.message }}</span>
   </div>
 </template>
 ```
@@ -137,23 +144,61 @@ const { activeProvider, isHealthy, fallbackActive, rateLimitRemaining } = useArm
 
 | Ref | Type | Description |
 |---|---|---|
-| `activeProvider` | `Ref<string>` | Currently active AI provider |
 | `isHealthy` | `Ref<boolean>` | Whether the provider is responding normally |
-| `fallbackActive` | `Ref<boolean>` | Whether a fallback provider is being used |
 | `rateLimitRemaining` | `Ref<number>` | Remaining requests before rate limit |
+| `rateLimitResetAt` | `Ref<string \| null>` | ISO timestamp when the rate limit resets |
+| `refresh` | `() => Promise<void>` | Re-fetch status data from the server |
+| `pending` | `Ref<boolean>` | Whether a fetch is in progress |
+| `error` | `Ref<Error \| null>` | Error from the last fetch attempt |
 
 ### useArmorSafety
 
-Track safety-related events:
+Check text against safety guardrails before sending to an AI provider. This is an active composable -- you call `checkText()` to run a safety check:
 
 ```vue
 <script setup lang="ts">
-const { lastBlocked, blockReason } = useArmorSafety()
+const { checkText, lastCheck, isBlocked, reason, details, blockCount, reset, pending, error } = useArmorSafety()
+
+const userInput = ref('')
+
+async function handleSubmit() {
+  await checkText(userInput.value)
+
+  if (isBlocked.value) {
+    // Input was flagged -- do not send to AI
+    return
+  }
+
+  // Safe to proceed with AI request
+  await $fetch('/api/chat', { method: 'POST', body: { prompt: userInput.value } })
+}
 </script>
 
 <template>
-  <div v-if="lastBlocked" class="safety-alert">
-    Request blocked: {{ blockReason }}
+  <form @submit.prevent="handleSubmit">
+    <textarea v-model="userInput" placeholder="Enter your prompt..." />
+    <button type="submit" :disabled="pending">
+      Send
+    </button>
+  </form>
+
+  <div v-if="isBlocked" class="safety-alert text-red">
+    <p>Request blocked: {{ reason }}</p>
+    <ul v-if="details.length">
+      <li v-for="(detail, i) in details" :key="i">
+        {{ detail }}
+      </li>
+    </ul>
+    <p class="text-sm">
+      Total blocks: {{ blockCount }}
+    </p>
+    <button @click="reset">
+      Dismiss
+    </button>
+  </div>
+
+  <div v-if="error" class="text-red">
+    Safety check error: {{ error.message }}
   </div>
 </template>
 ```
@@ -162,8 +207,15 @@ const { lastBlocked, blockReason } = useArmorSafety()
 
 | Ref | Type | Description |
 |---|---|---|
-| `lastBlocked` | `Ref<string \| null>` | Timestamp of last blocked request |
-| `blockReason` | `Ref<string \| null>` | Reason the request was blocked |
+| `checkText` | `(text: string, model?: string) => Promise<void>` | Run a safety check on the given text |
+| `lastCheck` | `ShallowRef<ArmorSafetyResponse \| null>` | Full response from the last safety check |
+| `isBlocked` | `Ref<boolean>` | Whether the last checked text was blocked |
+| `reason` | `Ref<string \| null>` | Human-readable reason for the block |
+| `details` | `Ref<string[]>` | Detailed list of matched safety rules |
+| `blockCount` | `Ref<number>` | Running count of blocked requests in this session |
+| `reset` | `() => void` | Clear all safety state (lastCheck, isBlocked, etc.) |
+| `pending` | `Ref<boolean>` | Whether a safety check is in progress |
+| `error` | `Ref<Error \| null>` | Error from the last safety check attempt |
 
 ## Server Route Integration
 
@@ -243,7 +295,7 @@ Combine the composables to build a full cost dashboard:
 <!-- pages/admin/ai-costs.vue -->
 <script setup lang="ts">
 const { todayCost, monthCost, budget, costHistory } = useArmorCost()
-const { activeProvider, isHealthy } = useArmorStatus()
+const { isHealthy, rateLimitRemaining } = useArmorStatus()
 
 const dailyUsagePercent = computed(() => {
   if (!budget.value.daily)
@@ -266,8 +318,8 @@ const monthlyUsagePercent = computed(() => {
 
     <!-- Provider Status -->
     <div class="mb-8 p-4 rounded-lg" :class="isHealthy ? 'bg-green-50' : 'bg-red-50'">
-      <span class="font-medium">{{ activeProvider }}</span>
-      <span class="ml-2">{{ isHealthy ? 'Operational' : 'Degraded' }}</span>
+      <span class="font-medium">{{ isHealthy ? 'Operational' : 'Degraded' }}</span>
+      <span class="ml-2">Rate limit remaining: {{ rateLimitRemaining }}</span>
     </div>
 
     <!-- Budget Gauges -->
