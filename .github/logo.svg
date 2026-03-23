@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
+  <defs>
+    <linearGradient id="shield" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a78bfa"/>
+      <stop offset="100%" style="stop-color:#c4b5fd"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield body -->
+  <path d="M90 16L28 48v44c0 38.7 26.4 74.9 62 84 35.6-9.1 62-45.3 62-84V48L90 16z" fill="url(#shield)" opacity="0.9"/>
+  <!-- Shield highlight -->
+  <path d="M90 28L40 54v38c0 32.3 21.3 62.2 50 70 28.7-7.8 50-37.7 50-70V54L90 28z" fill="none" stroke="url(#glow)" stroke-width="2"/>
+  <!-- AI circuit pattern -->
+  <circle cx="90" cy="78" r="16" fill="none" stroke="#e0e7ff" stroke-width="2.5"/>
+  <circle cx="90" cy="78" r="6" fill="#e0e7ff"/>
+  <!-- Circuit lines -->
+  <line x1="90" y1="62" x2="90" y2="46" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="104" y1="72" x2="118" y2="64" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="104" y1="84" x2="118" y2="92" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="76" y1="72" x2="62" y2="64" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="76" y1="84" x2="62" y2="92" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="90" y1="94" x2="90" y2="110" stroke="#e0e7ff" stroke-width="2" stroke-linecap="round"/>
+  <!-- Circuit nodes -->
+  <circle cx="90" cy="46" r="3.5" fill="#e0e7ff"/>
+  <circle cx="118" cy="64" r="3.5" fill="#e0e7ff"/>
+  <circle cx="118" cy="92" r="3.5" fill="#e0e7ff"/>
+  <circle cx="62" cy="64" r="3.5" fill="#e0e7ff"/>
+  <circle cx="62" cy="92" r="3.5" fill="#e0e7ff"/>
+  <circle cx="90" cy="110" r="3.5" fill="#e0e7ff"/>
+  <!-- Text -->
+  <text x="90" y="140" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="700" fill="#e0e7ff" letter-spacing="1">AI ARMOR</text>
+</svg>
