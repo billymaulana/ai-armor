@@ -1,9 +1,10 @@
 import type { ArmorConfig, ArmorContext, ArmorInstance, ArmorLog, ArmorRequest, FallbackResult, RateLimitResult, SafetyCheckResult } from './types'
 import { createExactCache } from './cache/exact-cache'
+import { createSemanticCache } from './cache/semantic-cache'
 import { createCostTracker } from './cost/tracker'
 import { createFallbackChain } from './fallback/chain'
 import { createLogger } from './logging/logger'
-import { calculateCost } from './pricing/database'
+import { createPricingRegistry } from './pricing/database'
 import { createSlidingWindowLimiter } from './rate-limit/sliding-window'
 import { createModelResolver } from './routing/resolver'
 import { createSafetyGuard } from './safety/guard'
@@ -11,6 +12,10 @@ import { createSafetyGuard } from './safety/guard'
 const BUDGET_WARN_DEBOUNCE_MS = 5 * 60 * 1000 // 5 minutes
 
 export function createArmor(config: ArmorConfig): ArmorInstance {
+  // Each armor instance gets its own pricing snapshot so mutations
+  // (addModel/removeModel) on one instance don't affect others.
+  const pricing = createPricingRegistry()
+
   // Initialize modules based on config
   const rateLimiter = config.rateLimit
     ? createSlidingWindowLimiter(config.rateLimit)
@@ -25,7 +30,9 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
     : undefined
 
   const cache = config.cache
-    ? createExactCache(config.cache)
+    ? (config.cache.strategy === 'semantic'
+        ? createSemanticCache(config.cache)
+        : createExactCache(config.cache))
     : undefined
 
   const logger = config.logging
@@ -52,10 +59,31 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
       return rateLimiter.check(ctx)
     },
 
+    async peekRateLimit(ctx: ArmorContext): Promise<{ remaining: number, resetAt: number }> {
+      if (!rateLimiter) {
+        return { remaining: Number.POSITIVE_INFINITY, resetAt: 0 }
+      }
+      return rateLimiter.peek(ctx)
+    },
+
     async trackCost(model: string, inputTokens: number, outputTokens: number, userId?: string): Promise<void> {
       if (costTracker) {
         await costTracker.trackUsage(model, inputTokens, outputTokens, userId)
       }
+    },
+
+    async getDailyCost(userId?: string): Promise<number> {
+      if (!costTracker) {
+        return 0
+      }
+      return costTracker.getDailyCost(userId)
+    },
+
+    async getMonthlyCost(userId?: string): Promise<number> {
+      if (!costTracker) {
+        return 0
+      }
+      return costTracker.getMonthlyCost(userId)
     },
 
     async checkBudget(model: string, ctx: ArmorContext) {
@@ -76,12 +104,15 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
         const now = Date.now()
         if (now - lastBudgetWarnedAt > BUDGET_WARN_DEBOUNCE_MS) {
           lastBudgetWarnedAt = now
-          const budgetInfo: { daily: number, monthly: number, perUserDaily?: number } = {
+          const budgetInfo: { daily: number, monthly: number, perUserDaily?: number, perUserMonthly?: number } = {
             daily: result.currentDaily,
             monthly: result.currentMonthly,
           }
           if (result.perUserDaily !== undefined) {
             budgetInfo.perUserDaily = result.perUserDaily
+          }
+          if (result.perUserMonthly !== undefined) {
+            budgetInfo.perUserMonthly = result.perUserMonthly
           }
           config.budget.onWarned(ctx, budgetInfo)
         }
@@ -96,15 +127,15 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
       return model
     },
 
-    getCachedResponse(request: ArmorRequest): unknown | undefined {
+    async getCachedResponse(request: ArmorRequest): Promise<unknown | undefined> {
       if (!cache)
         return undefined
       return cache.get(request)
     },
 
-    setCachedResponse(request: ArmorRequest, response: unknown): void {
+    async setCachedResponse(request: ArmorRequest, response: unknown): Promise<void> {
       if (cache) {
-        cache.set(request, response)
+        await cache.set(request, response)
       }
     },
 
@@ -122,7 +153,11 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
     },
 
     estimateCost(model: string, inputTokens: number, outputTokens: number): number {
-      return calculateCost(model, inputTokens, outputTokens)
+      return pricing.calculateCost(model, inputTokens, outputTokens)
+    },
+
+    getProvider(model: string): string {
+      return pricing.getProvider(model)
     },
 
     checkSafety(request: ArmorRequest, ctx: ArmorContext): SafetyCheckResult {

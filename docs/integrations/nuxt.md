@@ -51,7 +51,6 @@ export default defineNuxtConfig({
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
     },
     routing: {
       aliases: {
@@ -188,7 +187,7 @@ const armor = createArmor({
     onExceeded: 'downgrade-model',
     downgradeMap: { 'gpt-4o': 'gpt-4o-mini' },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   logging: { enabled: true, include: ['model', 'tokens', 'cost', 'latency'] },
 })
 

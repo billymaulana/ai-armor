@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 429,
       statusMessage: 'Rate limit exceeded',
+      statusText: 'Rate limit exceeded',
     })
   }
 })

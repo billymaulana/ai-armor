@@ -34,7 +34,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 3600,
-    driver: 'memory',
   },
   logging: {
     enabled: true,
@@ -60,7 +59,7 @@ One configuration object. All guardrails active. Works with any AI provider, any
 | AI SDK integration | First-class middleware | N/A | N/A |
 | Nuxt module | `@ai-armor/nuxt` | N/A | N/A |
 | Setup time | 5 minutes | Days/weeks | 30 minutes |
-| Dependencies | 2 (unstorage, gpt-tokenizer) | Many | Heavy |
+| Dependencies | 1 (gpt-tokenizer) | Many | Heavy |
 
 ## Key Differentiators
 
@@ -101,7 +100,7 @@ Every feature is opt-in. Start with just rate limiting, add cost tracking later,
 
 ### Minimal dependencies
 
-The core package depends only on `unstorage` (storage abstraction) and `gpt-tokenizer` (token counting). No heavy frameworks, no runtime bloat.
+The core package depends only on `gpt-tokenizer` (token counting). No heavy frameworks, no runtime bloat.
 
 ## Next Steps
 

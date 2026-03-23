@@ -182,6 +182,69 @@ describe('createCostTracker', () => {
     expect(result.perUserDaily).toBeDefined()
   })
 
+  it('should enforce per-user monthly limits', async () => {
+    const tracker = createCostTracker({
+      perUserMonthly: 0.001,
+      onExceeded: 'block',
+    })
+
+    await tracker.trackUsage('gpt-4o', 1000, 500, 'user-1')
+
+    const result = await tracker.checkBudget('gpt-4o', { userId: 'user-1' })
+    expect(result.allowed).toBe(false)
+    expect(result.perUserMonthly).toBeDefined()
+
+    // Different user should still be allowed
+    const result2 = await tracker.checkBudget('gpt-4o', { userId: 'user-2' })
+    expect(result2.allowed).toBe(true)
+  })
+
+  it('should downgrade model when per-user monthly limit exceeded', async () => {
+    const tracker = createCostTracker({
+      perUserMonthly: 0.001,
+      onExceeded: 'downgrade-model',
+      downgradeMap: { 'gpt-4o': 'gpt-4o-mini' },
+    })
+
+    await tracker.trackUsage('gpt-4o', 1000, 500, 'user-1')
+
+    const result = await tracker.checkBudget('gpt-4o', { userId: 'user-1' })
+    expect(result.allowed).toBe(true)
+    expect(result.action).toBe('downgrade-model')
+    expect(result.suggestedModel).toBe('gpt-4o-mini')
+    expect(result.perUserMonthly).toBeDefined()
+  })
+
+  it('should warn when per-user monthly limit exceeded with warn action', async () => {
+    const tracker = createCostTracker({
+      perUserMonthly: 0.001,
+      onExceeded: 'warn',
+    })
+
+    await tracker.trackUsage('gpt-4o', 1000, 500, 'user-1')
+
+    const result = await tracker.checkBudget('gpt-4o', { userId: 'user-1' })
+    expect(result.allowed).toBe(true)
+    expect(result.action).toBe('warn')
+    expect(result.perUserMonthly).toBeDefined()
+  })
+
+  it('should check perUser daily before perUserMonthly', async () => {
+    const tracker = createCostTracker({
+      perUser: 0.001,
+      perUserMonthly: 0.001,
+      onExceeded: 'block',
+    })
+
+    await tracker.trackUsage('gpt-4o', 1000, 500, 'user-1')
+
+    const result = await tracker.checkBudget('gpt-4o', { userId: 'user-1' })
+    expect(result.allowed).toBe(false)
+    // perUser (daily) is checked first, so perUserDaily should be set
+    expect(result.perUserDaily).toBeDefined()
+    expect(result.perUserMonthly).toBeUndefined()
+  })
+
   it('should throw when redis store is passed as string', () => {
     expect(() => createCostTracker({
       daily: 50,

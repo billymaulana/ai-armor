@@ -61,6 +61,16 @@
         "types": "./dist/http.d.cts",
         "default": "./dist/http.cjs"
       }
+    },
+    "./redis": {
+      "import": {
+        "types": "./dist/redis.d.ts",
+        "default": "./dist/redis.js"
+      },
+      "require": {
+        "types": "./dist/redis.d.cts",
+        "default": "./dist/redis.cjs"
+      }
     }
   },
   "main": "./dist/index.cjs",
@@ -86,8 +96,7 @@
     }
   },
   "dependencies": {
-    "gpt-tokenizer": "^2.8.1",
-    "unstorage": "^1.14.4"
+    "gpt-tokenizer": "^2.8.1"
   },
   "devDependencies": {
     "@ai-sdk/openai": "^3.0.0",

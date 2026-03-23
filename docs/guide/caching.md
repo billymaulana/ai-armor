@@ -14,7 +14,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 3600, // Cache entries expire after 1 hour
-    driver: 'memory',
     maxSize: 1000, // Keep at most 1000 entries
   },
 })
@@ -27,7 +26,6 @@ const armor = createArmor({
 | `enabled` | `boolean` | Yes | -- | Enable or disable caching |
 | `strategy` | `'exact'` | Yes | -- | Cache matching strategy (exact match only) |
 | `ttl` | `number` | Yes | -- | Time-to-live in seconds |
-| `driver` | `string` | Yes | -- | Storage driver (currently `'memory'`) |
 | `maxSize` | `number` | No | unlimited | Maximum cache entries before LRU eviction |
 | `keyFn` | `function` | No | -- | Custom cache key generator |
 
@@ -58,15 +56,15 @@ The `ttl` field sets how long cached responses remain valid, in seconds:
 
 ```ts
 // Short TTL for dynamic content
-const shortTtl = { enabled: true, strategy: 'exact' as const, ttl: 300, driver: 'memory' }
+const shortTtl = { enabled: true, strategy: 'exact' as const, ttl: 300 }
 // 5 minutes -- good for frequently changing data
 
 // Medium TTL for general use
-const mediumTtl = { enabled: true, strategy: 'exact' as const, ttl: 3600, driver: 'memory' }
+const mediumTtl = { enabled: true, strategy: 'exact' as const, ttl: 3600 }
 // 1 hour -- good balance of freshness and savings
 
 // Long TTL for stable content
-const longTtl = { enabled: true, strategy: 'exact' as const, ttl: 86400, driver: 'memory' }
+const longTtl = { enabled: true, strategy: 'exact' as const, ttl: 86400 }
 // 24 hours -- good for factual/reference queries
 ```
 
@@ -81,7 +79,7 @@ const cache = {
   enabled: true,
   strategy: 'exact' as const,
   ttl: 3600,
-  driver: 'memory',
+
   maxSize: 500, // Keep 500 most-recently-used entries
 }
 ```
@@ -104,7 +102,7 @@ const cache = {
   enabled: true,
   strategy: 'exact' as const,
   ttl: 3600,
-  driver: 'memory',
+
   keyFn: (request: { model: string, messages: { content: string }[] }) => {
     // Only cache by model + first message content (ignore temperature)
     const firstMessage = request.messages[0] as { content: string }
@@ -153,7 +151,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 3600,
-    driver: 'memory',
     maxSize: 500,
   },
 })
@@ -185,7 +182,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 1800, // 30 minutes
-    driver: 'memory',
     maxSize: 2000, // LRU eviction after 2000 entries
   },
   logging: {

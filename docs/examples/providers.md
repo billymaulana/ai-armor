@@ -380,7 +380,7 @@ const armor = createArmor({
     ],
   },
   budget: { daily: 200, onExceeded: 'block' },
-  cache: { enabled: true, strategy: 'exact', ttl: 1800, driver: 'memory', maxSize: 2000 },
+  cache: { enabled: true, strategy: 'exact', ttl: 1800, maxSize: 2000 },
   routing: {
     aliases: { fast: 'gpt-4o-mini', smart: 'gpt-4o' },
   },
@@ -421,7 +421,7 @@ const armor = createArmor({
     rules: [{ key: 'user', limit: 30, window: '1m' }],
   },
   budget: { daily: 100, onExceeded: 'warn' },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
 })
 
 export async function POST(req: Request) {

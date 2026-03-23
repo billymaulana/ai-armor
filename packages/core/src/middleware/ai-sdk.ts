@@ -1,5 +1,4 @@
 import type { ArmorContext, ArmorInstance, ArmorLog, ArmorRequest } from '../types'
-import { getProvider } from '../pricing/database'
 
 /**
  * Creates a Vercel AI SDK middleware adapter for ai-armor.
@@ -73,7 +72,7 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
       // Store per-request state keyed by the params object identity
       pendingStates.set(returnParams, {
         request,
-        cached: armor.getCachedResponse(request),
+        cached: await armor.getCachedResponse(request),
       })
 
       return returnParams
@@ -94,7 +93,7 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
           id: crypto.randomUUID(),
           timestamp: Date.now(),
           model: request.model,
-          provider: getProvider(request.model),
+          provider: armor.getProvider(request.model),
           inputTokens: 0,
           outputTokens: 0,
           cost: 0,
@@ -121,7 +120,7 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
           id: crypto.randomUUID(),
           timestamp: Date.now(),
           model,
-          provider: getProvider(model),
+          provider: armor.getProvider(model),
           inputTokens: 0,
           outputTokens: 0,
           cost: 0,
@@ -147,14 +146,14 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
 
       const finishReason = result.finishReason as string | undefined
       if (request && finishReason !== 'error') {
-        armor.setCachedResponse(request, result)
+        await armor.setCachedResponse(request, result)
       }
 
       const logEntry: ArmorLog = {
         id: crypto.randomUUID(),
         timestamp: Date.now(),
         model,
-        provider: getProvider(model),
+        provider: armor.getProvider(model),
         inputTokens,
         outputTokens,
         cost: armor.estimateCost(model, inputTokens, outputTokens),
@@ -171,6 +170,10 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
       return result
     },
 
+    // Stream responses are intentionally NOT cached. Unlike wrapGenerate, streaming
+    // responses arrive in chunks and the full response is only known after the stream
+    // completes. Caching would require buffering the entire stream, defeating the purpose
+    // of streaming (low time-to-first-token). Cost and tokens are still tracked on flush.
     wrapStream: async ({ doStream, params }: { doStream: () => Promise<Record<string, unknown>>, params: Record<string, unknown> }) => {
       const startTime = Date.now()
 
@@ -200,25 +203,31 @@ export function aiArmorMiddleware(armor: ArmorInstance, ctx?: ArmorContext) {
             }
           },
           async flush() {
-            const latency = Date.now() - startTime
-            await armor.trackCost(model, inputTokens, outputTokens, context.userId)
-            const logEntry: ArmorLog = {
-              id: crypto.randomUUID(),
-              timestamp: Date.now(),
-              model,
-              provider: getProvider(model),
-              inputTokens,
-              outputTokens,
-              cost: armor.estimateCost(model, inputTokens, outputTokens),
-              latency,
-              cached: false,
-              fallback: false,
-              rateLimited: false,
+            try {
+              const latency = Date.now() - startTime
+              await armor.trackCost(model, inputTokens, outputTokens, context.userId)
+              const logEntry: ArmorLog = {
+                id: crypto.randomUUID(),
+                timestamp: Date.now(),
+                model,
+                provider: armor.getProvider(model),
+                inputTokens,
+                outputTokens,
+                cost: armor.estimateCost(model, inputTokens, outputTokens),
+                latency,
+                cached: false,
+                fallback: false,
+                rateLimited: false,
+              }
+              if (context.userId !== undefined) {
+                logEntry.userId = context.userId
+              }
+              await armor.log(logEntry)
             }
-            if (context.userId !== undefined) {
-              logEntry.userId = context.userId
+            catch {
+              // Swallow tracking/logging errors -- stream delivery must not be corrupted
+              // by post-stream bookkeeping failures (e.g. external store timeout)
             }
-            await armor.log(logEntry)
           },
         }),
       )

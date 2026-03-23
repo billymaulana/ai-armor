@@ -11,6 +11,18 @@ export interface ModelPricing {
   output: number // USD per 1M output tokens
 }
 
+export interface PricingRegistry {
+  getModelPricing: (model: string) => ModelPricing | undefined
+  calculateCost: (model: string, inputTokens: number, outputTokens: number) => number
+  getProvider: (model: string) => string
+  getAllModels: () => string[]
+  addModel: (pricing: ModelPricing) => void
+  updateModel: (model: string, updates: Partial<Omit<ModelPricing, 'model'>>) => void
+  removeModel: (model: string) => boolean
+  reset: () => void
+  registerModels: (models: ModelPricing[]) => void
+}
+
 export const pricingDatabase: ModelPricing[] = [
   // OpenAI
   { model: 'gpt-4o', provider: 'openai', input: 2.50, output: 10.00 },
@@ -119,63 +131,99 @@ export const pricingDatabase: ModelPricing[] = [
   { model: 'qwen2.5-72b-instruct', provider: 'alibaba', input: 0.23, output: 0.46 },
 ]
 
-const pricingMap = new Map<string, ModelPricing>()
-for (const entry of pricingDatabase) {
-  pricingMap.set(entry.model, entry)
+/**
+ * Creates an isolated pricing registry. Each registry has its own model map,
+ * so mutations (addModel, removeModel) do not affect other registries.
+ *
+ * Use `createPricingRegistry()` for test isolation or multi-tenant pricing.
+ * The module-level exports (getModelPricing, calculateCost, etc.) delegate
+ * to a shared default registry for backward compatibility.
+ */
+export function createPricingRegistry(initialModels: ModelPricing[] = pricingDatabase): PricingRegistry {
+  const map = new Map<string, ModelPricing>()
+  for (const entry of initialModels) {
+    map.set(entry.model, entry)
+  }
+
+  function getModelPricing(model: string): ModelPricing | undefined {
+    return map.get(model)
+  }
+
+  function calculateCost(model: string, inputTokens: number, outputTokens: number): number {
+    const pricing = getModelPricing(model)
+    if (!pricing)
+      return 0
+    return (inputTokens / 1_000_000) * pricing.input + (outputTokens / 1_000_000) * pricing.output
+  }
+
+  return {
+    getModelPricing,
+    calculateCost,
+    getProvider: (model: string) => map.get(model)?.provider ?? 'unknown',
+    getAllModels: () => [...map.keys()],
+    addModel(pricing: ModelPricing) {
+      if (map.has(pricing.model)) {
+        throw new Error(`Model "${pricing.model}" already exists in pricing database`)
+      }
+      map.set(pricing.model, pricing)
+    },
+    updateModel(model: string, updates: Partial<Omit<ModelPricing, 'model'>>) {
+      const existing = map.get(model)
+      if (!existing) {
+        throw new Error(`Model "${model}" not found in pricing database`)
+      }
+      map.set(model, { ...existing, ...updates })
+    },
+    removeModel: (model: string) => map.delete(model),
+    reset() {
+      map.clear()
+      for (const entry of initialModels) {
+        map.set(entry.model, entry)
+      }
+    },
+    registerModels(models: ModelPricing[]) {
+      for (const pricing of models) {
+        map.set(pricing.model, pricing)
+      }
+    },
+  }
 }
 
+// Default global registry -- backward-compatible module exports delegate here
+const defaultRegistry = createPricingRegistry()
+
 export function getModelPricing(model: string): ModelPricing | undefined {
-  return pricingMap.get(model)
+  return defaultRegistry.getModelPricing(model)
 }
 
 export function calculateCost(model: string, inputTokens: number, outputTokens: number): number {
-  const pricing = getModelPricing(model)
-  if (!pricing) {
-    return 0
-  }
-
-  const inputCost = (inputTokens / 1_000_000) * pricing.input
-  const outputCost = (outputTokens / 1_000_000) * pricing.output
-
-  return inputCost + outputCost
+  return defaultRegistry.calculateCost(model, inputTokens, outputTokens)
 }
 
 export function getProvider(model: string): string {
-  return pricingMap.get(model)?.provider ?? 'unknown'
+  return defaultRegistry.getProvider(model)
 }
 
 export function getAllModels(): string[] {
-  return [...pricingMap.keys()]
+  return defaultRegistry.getAllModels()
 }
 
 export function addModel(pricing: ModelPricing): void {
-  if (pricingMap.has(pricing.model)) {
-    throw new Error(`Model "${pricing.model}" already exists in pricing database`)
-  }
-  pricingMap.set(pricing.model, pricing)
+  defaultRegistry.addModel(pricing)
 }
 
 export function updateModel(model: string, updates: Partial<Omit<ModelPricing, 'model'>>): void {
-  const existing = pricingMap.get(model)
-  if (!existing) {
-    throw new Error(`Model "${model}" not found in pricing database`)
-  }
-  pricingMap.set(model, { ...existing, ...updates })
+  defaultRegistry.updateModel(model, updates)
 }
 
 export function removeModel(model: string): boolean {
-  return pricingMap.delete(model)
+  return defaultRegistry.removeModel(model)
 }
 
 export function resetPricing(): void {
-  pricingMap.clear()
-  for (const entry of pricingDatabase) {
-    pricingMap.set(entry.model, entry)
-  }
+  defaultRegistry.reset()
 }
 
 export function registerModels(models: ModelPricing[]): void {
-  for (const pricing of models) {
-    pricingMap.set(pricing.model, pricing)
-  }
+  defaultRegistry.registerModels(models)
 }

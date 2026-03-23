@@ -12,7 +12,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
     })
 
     const req = makeRequest('gpt-4o')
@@ -27,7 +27,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
     })
 
     const result = cache.get(makeRequest('gpt-4o'))
@@ -39,7 +39,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
     })
 
     const req1 = makeRequest('gpt-4o')
@@ -59,7 +59,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 1, // 1 second
-      driver: 'memory',
+
     })
 
     const req = makeRequest('gpt-4o')
@@ -79,7 +79,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
       maxSize: 2,
     })
 
@@ -96,7 +96,7 @@ describe('createExactCache', () => {
       enabled: false,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
     })
 
     const req = makeRequest('gpt-4o')
@@ -111,7 +111,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
       keyFn: req => `custom:${req.model}`,
     })
 
@@ -129,7 +129,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
     })
 
     cache.set(makeRequest('model-a'), { content: 'a' })
@@ -146,7 +146,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 3600,
-      driver: 'memory',
+
     })
 
     const req = makeRequest('gpt-4o')
@@ -163,7 +163,7 @@ describe('createExactCache', () => {
       enabled: true,
       strategy: 'exact',
       ttl: 1, // 1 second
-      driver: 'memory',
+
     })
 
     cache.set(makeRequest('model-a', [{ content: 'a' }]), { content: 'a' })
