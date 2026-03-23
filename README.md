@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.svg" alt="ai-armor logo" width="180" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/billymaulana/ai-armor/staging/.github/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/billymaulana/ai-armor/staging/.github/logo.svg">
+    <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/staging/.github/logo.svg" alt="ai-armor logo" width="180" />
+  </picture>
 </p>
 
 <h1 align="center">ai-armor</h1>
@@ -12,14 +16,14 @@
   <a href="https://www.npmjs.com/package/ai-armor"><img src="https://img.shields.io/npm/v/ai-armor?color=yellow&label=npm" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="https://github.com/billymaulana/ai-armor/actions/workflows/ci.yml"><img src="https://github.com/billymaulana/ai-armor/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://codecov.io/gh/billymaulana/ai-armor"><img src="https://img.shields.io/badge/coverage-96.6%25-brightgreen" alt="Coverage: 96.6%"></a>
+  <img src="https://img.shields.io/badge/coverage-96.6%25-brightgreen" alt="Coverage: 96.6%">
   <a href="https://www.npmjs.com/package/ai-armor"><img src="https://img.shields.io/npm/dm/ai-armor?color=green" alt="npm downloads"></a>
   <a href="https://github.com/billymaulana/ai-armor"><img src="https://img.shields.io/github/stars/billymaulana/ai-armor?style=social" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
   <a href="https://billymaulana.github.io/ai-armor/">Documentation</a> &bull;
-  <a href="https://stackblitz.com/github/billymaulana/ai-armor/tree/main/playground-nuxt">Playground</a> &bull;
+  <a href="https://stackblitz.com/github/billymaulana/ai-armor/tree/staging/playground-nuxt">Playground</a> &bull;
   <a href="https://github.com/billymaulana/ai-armor/issues">Issues</a>
 </p>
 
@@ -142,8 +146,6 @@ const armor = createArmor({
     enabled: true,
     include: ['model', 'tokens', 'cost', 'latency', 'cached', 'fallback'],
     onRequest: (log) => {
-      // Send to your observability platform
-      // e.g. send to DataDog, Grafana, or your own analytics
       process.stdout.write(`[${log.model}] ${log.cost.toFixed(4)}$ | ${log.latency}ms\n`)
     },
   },
@@ -154,37 +156,25 @@ const armor = createArmor({
 
 ## Vercel AI SDK Integration
 
-ai-armor provides a first-class middleware adapter for the [Vercel AI SDK](https://sdk.vercel.ai/). Every request is automatically rate-limited, budget-checked, safety-scanned, cached, and logged.
+ai-armor provides a first-class middleware adapter for the [Vercel AI SDK](https://sdk.vercel.ai/).
 
 ```ts
 import { openai } from '@ai-sdk/openai'
 import { generateText, wrapLanguageModel } from 'ai'
 import { aiArmorMiddleware } from 'ai-armor/ai-sdk'
 
-// Wrap any model with ai-armor protection
 const protectedModel = wrapLanguageModel({
   model: openai('gpt-4o'),
   middleware: aiArmorMiddleware(armor, { userId: 'user-123' }),
 })
 
-// Use it exactly like a normal AI SDK model
 const { text } = await generateText({
   model: protectedModel,
   prompt: 'Explain quantum computing in one paragraph.',
 })
 ```
 
-What happens behind the scenes:
-
-1. Safety guard scans the prompt for injection attempts and PII
-2. Rate limiter checks the user's request count
-3. Budget controller verifies spending limits (downgrades model if needed)
-4. Cache returns a stored response if an identical request was made recently
-5. On completion, tokens and cost are tracked and logged
-
 ### Streaming Support
-
-Streaming works out of the box. The `wrapStream` hook automatically tracks cost and tokens when the stream completes:
 
 ```ts
 import { streamText } from 'ai'
@@ -197,14 +187,11 @@ const { textStream } = streamText({
 for await (const chunk of textStream) {
   process.stdout.write(chunk)
 }
-// Cost tracked automatically on stream completion
 ```
 
 ---
 
 ## HTTP Middleware (Express / h3)
-
-Use ai-armor as HTTP middleware for any Node.js server. It handles rate limiting, safety checks, budget enforcement, and caching at the request level.
 
 ```ts
 import { createArmor } from 'ai-armor'
@@ -214,114 +201,46 @@ import express from 'express'
 const app = express()
 app.use(express.json())
 
-const armor = createArmor({
-  rateLimit: {
-    strategy: 'sliding-window',
-    rules: [{ key: 'ip', limit: 60, window: '1m' }],
-  },
-  budget: {
-    daily: 100,
-    monthly: 1000,
-    onExceeded: 'block',
-  },
-  safety: {
-    promptInjection: true,
-    piiDetection: true,
-  },
-})
-
-// Protect your AI routes
 app.use('/api/ai', createArmorHandler(armor, {
   contextFromRequest: req => ({
     userId: req.headers['x-user-id'] as string,
     ip: req.headers['x-forwarded-for'] as string,
-    apiKey: req.headers['x-api-key'] as string,
   }),
 }))
 
-// Your AI endpoint (only reached if armor allows it)
-app.post('/api/ai/chat', async (req, res) => {
-  // Request has been rate-limited, safety-checked, and budget-verified
-  // req.body.model may have been resolved from alias or downgraded
-  const result = await callYourAIProvider(req.body)
-  res.json(result)
-})
-
 app.listen(3000)
 ```
-
-Response headers are automatically set:
-
-- `X-RateLimit-Remaining` -- requests left in the current window
-- `X-RateLimit-Reset` -- timestamp when the window resets
-- `Retry-After` -- seconds until the client can retry (on 429)
 
 ---
 
 ## Nuxt Module
 
-The `@ai-armor/nuxt` module provides auto-imported composables, server-side middleware, and built-in admin API routes.
-
-### Install
-
 ```bash
 pnpm add @ai-armor/nuxt
 ```
-
-### Configure
 
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@ai-armor/nuxt'],
-
   aiArmor: {
     rateLimit: {
       strategy: 'sliding-window',
       rules: [{ key: 'ip', limit: 30, window: '1m' }],
     },
-    budget: {
-      daily: 50,
-      monthly: 500,
-      onExceeded: 'warn',
-    },
-    routing: {
-      aliases: { fast: 'gpt-4o-mini', smart: 'claude-sonnet-4-6' },
-    },
-    safety: {
-      promptInjection: true,
-      piiDetection: true,
-    },
+    budget: { daily: 50, monthly: 500, onExceeded: 'warn' },
+    safety: { promptInjection: true, piiDetection: true },
   },
 })
 ```
 
 ### Auto-Imported Composables
 
-```vue
-<script setup lang="ts">
-// All composables are auto-imported -- no import needed
-
-// Track cost and budget
-const { todayCost, monthCost, budget, isNearLimit } = useArmorCost()
-
-// Monitor system health
-const { isHealthy, rateLimitRemaining } = useArmorStatus()
-
-// Track safety events on the client
-const { blockCount, blockReason, recordBlock } = useArmorSafety()
-</script>
-
-<template>
-  <div>
-    <p>Today: ${{ todayCost.toFixed(2) }} / ${{ budget.daily }}</p>
-    <p v-if="isNearLimit">
-      Warning: approaching daily budget limit
-    </p>
-    <p>Rate limit remaining: {{ rateLimitRemaining }}</p>
-  </div>
-</template>
-```
+| Composable | Purpose |
+|:---|:---|
+| `useArmorCost()` | Track daily/monthly cost, budget proximity |
+| `useArmorStatus()` | Health check, rate limit remaining |
+| `useArmorSafety()` | Safety event tracking, block counts |
 
 ### Built-in API Routes
 
@@ -331,43 +250,29 @@ const { blockCount, blockReason, recordBlock } = useArmorSafety()
 | `GET /api/_armor/usage` | Cost tracking, budget utilization |
 | `POST /api/_armor/safety` | Safety check for text content |
 
-All admin routes are protected by `adminSecret` when configured in `nuxt.config.ts`.
+All admin routes are protected by `adminSecret` when configured.
 
 ---
 
 ## Redis Adapter
 
-For distributed deployments (multiple server processes, serverless), use the official Redis adapter:
-
 ```ts
 import { createArmor, createRedisAdapter } from 'ai-armor'
 import Redis from 'ioredis'
 
-const redis = new Redis()
-const adapter = createRedisAdapter(redis, { prefix: 'myapp:', ttl: 86400 })
+const adapter = createRedisAdapter(new Redis(), { prefix: 'myapp:', ttl: 86400 })
 
 const armor = createArmor({
-  rateLimit: {
-    strategy: 'sliding-window',
-    rules: [{ key: 'user', limit: 20, window: '1m' }],
-    store: adapter,
-  },
-  budget: {
-    daily: 50,
-    monthly: 500,
-    onExceeded: 'block',
-    store: adapter,
-  },
+  rateLimit: { strategy: 'sliding-window', rules: [{ key: 'user', limit: 20, window: '1m' }], store: adapter },
+  budget: { daily: 50, monthly: 500, onExceeded: 'block', store: adapter },
 })
 ```
 
-Works with any Redis-compatible client (ioredis, @upstash/redis, etc). Also available as `import { createRedisAdapter } from 'ai-armor/redis'`.
+Works with ioredis, @upstash/redis, or any Redis-compatible client. Also available as `import { createRedisAdapter } from 'ai-armor/redis'`.
 
 ---
 
 ## Semantic Caching
-
-For fuzzy cache matching using embeddings, use `strategy: 'semantic'`:
 
 ```ts
 import { openai } from '@ai-sdk/openai'
@@ -381,40 +286,14 @@ const armor = createArmor({
     maxSize: 1000,
     similarityThreshold: 0.92,
     embeddingFn: async (text) => {
-      const res = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
-        input: text,
-      })
+      const res = await openai.embeddings.create({ model: 'text-embedding-3-small', input: text })
       return res.data[0].embedding
     },
   },
 })
 ```
 
-Semantic caching returns cached responses for similar (not just identical) prompts. Built-in cosine similarity engine, you supply the embedding function.
-
----
-
-## Playground
-
-Try ai-armor without installing anything:
-
-<a href="https://stackblitz.com/github/billymaulana/ai-armor/tree/main/playground-nuxt"><img src="https://developer.stackblitz.com/img/open_in_stackblitz.svg" alt="Open in StackBlitz"></a>
-
-The Nuxt playground includes:
-- Interactive chat demo with mock AI (no API key needed)
-- Real-time cost tracking dashboard
-- Rate limiting in action
-- Safety guardrail demos (prompt injection detection)
-- Budget controls with model downgrade
-
-```bash
-# Or run locally
-git clone https://github.com/billymaulana/ai-armor.git
-cd ai-armor
-pnpm install
-pnpm playground:nuxt
-```
+Returns cached responses for semantically similar prompts using cosine similarity.
 
 ---
 
@@ -431,40 +310,9 @@ pnpm playground:nuxt
 | Response caching | :white_check_mark: | :white_check_mark: | :white_check_mark: | :x: |
 | Semantic caching | :white_check_mark: | :x: | :x: | :x: |
 | Safety guardrails | :white_check_mark: | :x: | :x: | :x: |
-| Model alias routing | :white_check_mark: | :white_check_mark: | :x: | :x: |
 | Redis adapter | :white_check_mark: | :white_check_mark: | N/A | :x: |
 | Nuxt module | :white_check_mark: | :x: | :x: | :x: |
 | Minimal dependencies | :white_check_mark: (1 dep) | :x: | :x: | :white_check_mark: |
-
----
-
-## Tech Stack
-
-- **Language:** TypeScript (strict mode, zero `any`)
-- **Build:** tsdown (ESM + CJS dual output)
-- **Test:** Vitest (381 tests, 96.6% coverage)
-- **Lint:** @antfu/eslint-config
-- **Monorepo:** pnpm workspaces
-- **Release:** Changesets + GitHub Actions
-
----
-
-## Contributing
-
-Contributions are welcome. See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, coding standards, and the PR process.
-
-```bash
-# Clone and install
-git clone https://github.com/billymaulana/ai-armor.git
-cd ai-armor
-pnpm install
-
-# Run tests
-pnpm test
-
-# Run quality checks (lint + typecheck + tests)
-pnpm quality
-```
 
 ---
 
@@ -480,12 +328,8 @@ pnpm quality
   </a>
 </p>
 
-<p align="center">
-  Your logo here -- <a href="https://github.com/sponsors/billymaulana">become a sponsor</a>
-</p>
-
 ---
 
 ## License
 
-[MIT](./LICENSE) -- Created by [Billy Maulana](https://github.com/billymaulana)
+[MIT](./LICENSE) -- [Billy Maulana](https://github.com/billymaulana)
