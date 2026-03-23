@@ -41,7 +41,8 @@ Every production AI application rebuilds the same infrastructure from scratch: r
 | **Cost Tracking** | Automatic token counting with built-in pricing for 100+ models |
 | **Budget Controls** | Daily / monthly / per-user limits -- block, warn, or auto-downgrade model |
 | **Fallback Chains** | Health-tracked provider chains with retries and exponential backoff |
-| **Response Caching** | Exact-match cache with LRU eviction and configurable TTL |
+| **Response Caching** | Exact-match and semantic (embedding) cache with LRU eviction |
+| **Redis Adapter** | Official Redis storage adapter for distributed rate limiting and budgets |
 | **Model Alias Routing** | Semantic aliases (`fast` -> `gpt-4o-mini`, `smart` -> `claude-sonnet-4-6`) |
 | **Safety Guardrails** | Prompt injection detection, PII detection, token limits, blocked patterns |
 | **Structured Logging** | Per-request observability with hooks for external systems |
@@ -109,7 +110,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 300,
-    driver: 'memory',
     maxSize: 500,
   },
 
@@ -321,6 +321,69 @@ const { blockCount, blockReason, recordBlock } = useArmorSafety()
 |:---|:---|
 | `GET /api/_armor/status` | Health status, rate limit info |
 | `GET /api/_armor/usage` | Cost tracking, budget utilization |
+| `POST /api/_armor/safety` | Safety check for text content |
+
+All admin routes are protected by `adminSecret` when configured in `nuxt.config.ts`.
+
+---
+
+## Redis Adapter
+
+For distributed deployments (multiple server processes, serverless), use the official Redis adapter:
+
+```ts
+import { createArmor, createRedisAdapter } from 'ai-armor'
+import Redis from 'ioredis'
+
+const redis = new Redis()
+const adapter = createRedisAdapter(redis, { prefix: 'myapp:', ttl: 86400 })
+
+const armor = createArmor({
+  rateLimit: {
+    strategy: 'sliding-window',
+    rules: [{ key: 'user', limit: 20, window: '1m' }],
+    store: adapter,
+  },
+  budget: {
+    daily: 50,
+    monthly: 500,
+    onExceeded: 'block',
+    store: adapter,
+  },
+})
+```
+
+Works with any Redis-compatible client (ioredis, @upstash/redis, etc). Also available as `import { createRedisAdapter } from 'ai-armor/redis'`.
+
+---
+
+## Semantic Caching
+
+For fuzzy cache matching using embeddings, use `strategy: 'semantic'`:
+
+```ts
+import { openai } from '@ai-sdk/openai'
+import { createArmor } from 'ai-armor'
+
+const armor = createArmor({
+  cache: {
+    enabled: true,
+    strategy: 'semantic',
+    ttl: 3600,
+    maxSize: 1000,
+    similarityThreshold: 0.92,
+    embeddingFn: async (text) => {
+      const res = await openai.embeddings.create({
+        model: 'text-embedding-3-small',
+        input: text,
+      })
+      return res.data[0].embedding
+    },
+  },
+})
+```
+
+Semantic caching returns cached responses for similar (not just identical) prompts. Built-in cosine similarity engine, you supply the embedding function.
 
 ---
 
@@ -355,7 +418,8 @@ pnpm playground:nuxt
 | Cost Tracking | `budget` | Automatic token counting and cost calculation for 100+ models |
 | Budget Controls | `budget.onExceeded` | Block requests, warn, or auto-downgrade to a cheaper model |
 | Fallback Chains | `fallback` | Retry failed requests across providers with exponential backoff |
-| Response Caching | `cache` | Exact-match cache with LRU eviction, configurable TTL and max size |
+| Response Caching | `cache` | Exact-match and semantic cache with LRU eviction and configurable TTL |
+| Redis Adapter | `createRedisAdapter` | Official Redis storage for distributed rate limiting and budgets |
 | Model Routing | `routing` | Map semantic aliases to concrete model identifiers |
 | Prompt Injection | `safety.promptInjection` | Detect and block common prompt injection patterns |
 | PII Detection | `safety.piiDetection` | Detect emails, phone numbers, SSNs, and other PII in prompts |
@@ -387,7 +451,7 @@ pnpm playground:nuxt
 
 - **Language:** TypeScript (strict mode, zero `any`)
 - **Build:** tsdown (ESM + CJS dual output)
-- **Test:** Vitest (265+ tests, >80% coverage)
+- **Test:** Vitest (381 tests, >96% coverage)
 - **Lint:** @antfu/eslint-config
 - **Monorepo:** pnpm workspaces
 - **Release:** Changesets + GitHub Actions
