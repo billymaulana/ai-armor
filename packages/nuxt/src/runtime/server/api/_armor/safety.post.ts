@@ -12,24 +12,23 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  const body = await readBody(event)
   const armor = useArmorInstance()
 
-  // Use getRequestIP for safer IP extraction (respects proxy config)
+  const text = typeof body?.text === 'string' ? body.text : ''
+  const model = typeof body?.model === 'string' ? body.model : 'unknown'
+
+  const request = {
+    model,
+    messages: [{ role: 'user', content: text }],
+  }
+
   const ip = getRequestIP(event) ?? getRequestHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim()
 
   const ctx = {
     ip,
     userId: getRequestHeader(event, 'x-user-id'),
-    apiKey: getRequestHeader(event, 'x-api-key'),
   }
 
-  const rateLimitResult = await armor.peekRateLimit(ctx)
-
-  return {
-    healthy: true,
-    rateLimitRemaining: rateLimitResult.remaining,
-    rateLimitResetAt: rateLimitResult.resetAt > 0
-      ? new Date(rateLimitResult.resetAt).toISOString()
-      : null,
-  }
+  return armor.checkSafety(request, ctx)
 })
