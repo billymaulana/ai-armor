@@ -1,7 +1,7 @@
 {
   "name": "@ai-armor/nuxt",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Nuxt module for ai-armor -- production AI toolkit",
   "author": "billymaulana",
   "license": "MIT",
