@@ -1,85 +1,60 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 520" fill="none">
-  <defs>
-    <linearGradient id="c" x1="240" y1="0" x2="240" y2="520" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#22d3ee"/>
-      <stop offset="100%" stop-color="#0891b2"/>
-    </linearGradient>
-    <linearGradient id="d" x1="240" y1="80" x2="240" y2="460" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#0f172a"/>
-      <stop offset="100%" stop-color="#0a0f1c"/>
-    </linearGradient>
-  </defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 440" fill="none">
+  <!-- AI ARMOR — Clean shield + AIA monogram -->
+  <!-- Design: monochrome-first, no gradients, geometric precision -->
 
-  <!-- SHIELD shape -->
-  <path d="M240 80
-           C172 80 110 92 72 110
-           C62 114 58 124 60 136
-           L74 320
-           C84 400 140 448 240 490
-           C340 448 396 400 406 320
-           L420 136
-           C422 124 418 114 408 110
-           C370 92 308 80 240 80Z"
-        fill="url(#d)" stroke="url(#c)" stroke-width="5"/>
+  <!-- Shield outline -->
+  <path d="M180 32
+           C128 32 78 42 44 58
+           C38 61 34 68 35 76
+           L48 272
+           C56 344 108 392 180 428
+           C252 392 304 344 312 272
+           L325 76
+           C326 68 322 61 316 58
+           C282 42 232 32 180 32Z"
+        fill="currentColor"/>
 
-  <!-- Shield inner line -->
-  <path d="M240 100
-           C180 100 126 110 94 124
-           L106 316
-           C114 388 162 430 240 468
-           C318 430 366 388 374 316
-           L386 124
-           C354 110 300 100 240 100Z"
-        fill="none" stroke="url(#c)" stroke-width="1" opacity="0.12"/>
+  <!-- Shield inner (cutout) -->
+  <path d="M180 52
+           C134 52 90 60 62 74
+           L74 268
+           C80 334 126 376 180 408
+           C234 376 280 334 286 268
+           L298 74
+           C270 60 226 52 180 52Z"
+        fill="#09090b"/>
 
-  <!-- === SWORD (doubles as letter I) === -->
-  <!-- Pommel -->
-  <circle cx="240" cy="16" r="14" fill="url(#c)"/>
-  <circle cx="240" cy="16" r="7" fill="url(#d)"/>
-  <!-- Grip -->
-  <rect x="234" y="30" width="12" height="44" rx="3" fill="url(#c)"/>
-  <!-- Grip wraps -->
-  <line x1="235" y1="42" x2="245" y2="38" stroke="url(#d)" stroke-width="1.2" opacity="0.3"/>
-  <line x1="235" y1="52" x2="245" y2="48" stroke="url(#d)" stroke-width="1.2" opacity="0.3"/>
-  <line x1="235" y1="62" x2="245" y2="58" stroke="url(#d)" stroke-width="1.2" opacity="0.3"/>
-  <!-- Crossguard -->
-  <path d="M188 78 C200 72 220 70 240 70 C260 70 280 72 292 78 C294 80 294 84 292 86 C280 92 260 94 240 94 C220 94 200 92 188 86 C186 84 186 80 188 78Z"
-        fill="url(#c)"/>
-  <!-- Blade through shield -->
-  <path d="M234 94 L234 478 L240 502 L246 478 L246 94Z" fill="url(#c)" opacity="0.7"/>
-  <!-- Fuller -->
-  <line x1="240" y1="110" x2="240" y2="472" stroke="url(#d)" stroke-width="2" opacity="0.3"/>
+  <!-- Letter A (left) -->
+  <path d="M120 148
+           L80 348
+           L100 348
+           L108 312
+           L148 312
+           L140 348
+           L160 348
+           L140 148Z
+           M112 296
+           L128 200
+           L144 296Z"
+        fill="currentColor" fill-rule="evenodd"/>
 
-  <!-- === LETTER A (left) === -->
-  <g fill="url(#c)">
-    <!-- Left A — two diagonal strokes + crossbar -->
-    <polygon points="148,164 88,400 112,400"/>
-    <polygon points="148,164 176,400 200,400"/>
-    <!-- Crossbar -->
-    <rect x="100" y="324" width="88" height="16" rx="3"/>
-    <!-- Top serif -->
-    <rect x="136" y="152" width="24" height="10" rx="2"/>
-    <!-- Bottom serifs -->
-    <rect x="82" y="400" width="36" height="10" rx="2"/>
-    <rect x="170" y="400" width="36" height="10" rx="2"/>
-  </g>
+  <!-- Letter I (center) — clean vertical bar -->
+  <rect x="170" y="148" width="20" height="200" rx="2" fill="currentColor"/>
+  <!-- I serifs -->
+  <rect x="162" y="148" width="36" height="12" rx="2" fill="currentColor"/>
+  <rect x="162" y="336" width="36" height="12" rx="2" fill="currentColor"/>
 
-  <!-- === LETTER A (right) === -->
-  <g fill="url(#c)">
-    <polygon points="332,164 272,400 296,400"/>
-    <polygon points="332,164 360,400 384,400"/>
-    <!-- Crossbar -->
-    <rect x="284" y="324" width="88" height="16" rx="3"/>
-    <!-- Top serif -->
-    <rect x="320" y="152" width="24" height="10" rx="2"/>
-    <!-- Bottom serifs -->
-    <rect x="266" y="400" width="36" height="10" rx="2"/>
-    <rect x="354" y="400" width="36" height="10" rx="2"/>
-  </g>
-
-  <!-- === LETTER I (sword blade IS the I) === -->
-  <!-- Top serif bar -->
-  <rect x="220" y="152" width="40" height="10" rx="2" fill="url(#c)"/>
-  <!-- Bottom serif bar -->
-  <rect x="220" y="400" width="40" height="10" rx="2" fill="url(#c)"/>
+  <!-- Letter A (right) -->
+  <path d="M240 148
+           L200 348
+           L220 348
+           L228 312
+           L268 312
+           L260 348
+           L280 348
+           L260 148Z
+           M232 296
+           L248 200
+           L264 296Z"
+        fill="currentColor" fill-rule="evenodd"/>
 </svg>
