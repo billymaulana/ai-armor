@@ -1,53 +1,71 @@
 <script setup lang="ts">
+import { ref } from 'vue'
+
+const copied = ref(false)
+
+function copyInstall() {
+  navigator.clipboard.writeText('npm install ai-armor')
+  copied.value = true
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
+}
 </script>
 
 <template>
-  <section class="hero-section">
-    <!-- Grid background -->
-    <div class="hero-grid" />
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="hero-dots" />
+      <div class="hero-beam" />
+      <div class="hero-beam hero-beam--2" />
+    </div>
 
-    <!-- Glow orb -->
-    <div class="hero-glow" />
-
-    <div class="hero-container">
+    <div class="hero-inner">
+      <!-- Left: Content -->
       <div class="hero-content">
         <div class="hero-badge">
-          Production-ready AI toolkit
+          <span class="badge-dot" />
+          Production AI Toolkit
         </div>
+
         <h1 class="hero-title">
-          <span class="hero-gradient">ai-armor</span>
-          <br>
-          Ship AI to production
-          <br>
-          without going broke.
+          Protect your AI APIs.
+          <span class="hero-title-accent">One package.</span>
         </h1>
-        <p class="hero-tagline">
-          Rate limiting, cost tracking, caching, model routing, and safety
-          guardrails for every AI provider. One config. Zero vendor lock-in.
+
+        <p class="hero-desc">
+          Rate limiting, cost tracking, caching, safety guardrails,
+          and fallback chains for every AI provider.
+          Zero vendor lock-in.
         </p>
+
         <div class="hero-actions">
           <a href="/ai-armor/guide/getting-started.html" class="btn-primary">
             Get Started
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </a>
-          <a href="https://github.com/billymaulana/ai-armor" class="btn-outline" target="_blank">
-            View on GitHub
+          <a href="https://github.com/billymaulana/ai-armor" class="btn-ghost" target="_blank">
+            GitHub
           </a>
         </div>
 
-        <!-- Install command -->
-        <div class="install-cmd">
-          <code>npm install ai-armor</code>
-        </div>
+        <button class="install-cmd" @click="copyInstall">
+          <span class="install-prompt">$</span>
+          <span class="install-text">npm install ai-armor</span>
+          <span class="install-copy">{{ copied ? 'Copied!' : 'Copy' }}</span>
+        </button>
       </div>
 
-      <!-- Code Preview -->
-      <div class="hero-code">
+      <!-- Right: Code Window -->
+      <div class="hero-visual">
         <div class="code-window">
-          <div class="code-titlebar">
-            <span class="code-dot code-dot--red" />
-            <span class="code-dot code-dot--yellow" />
-            <span class="code-dot code-dot--green" />
-            <span class="code-filename">app.ts</span>
+          <div class="code-chrome">
+            <div class="code-dots">
+              <span /><span /><span />
+            </div>
+            <span class="code-file">armor.config.ts</span>
           </div>
           <pre class="code-body"><code><span class="ck">import</span> { <span class="cf">createArmor</span> } <span class="ck">from</span> <span class="cs">'ai-armor'</span>
 
@@ -61,6 +79,7 @@
     <span class="cp">onExceeded</span>: <span class="cs">'downgrade-model'</span>,
     <span class="cp">downgradeMap</span>: { <span class="cs">'gpt-4o'</span>: <span class="cs">'gpt-4o-mini'</span> },
   },
+  <span class="cp">safety</span>: { <span class="cp">promptInjection</span>: <span class="cn">true</span>, <span class="cp">piiDetection</span>: <span class="cn">true</span> },
   <span class="cp">cache</span>: { <span class="cp">enabled</span>: <span class="cn">true</span>, <span class="cp">ttl</span>: <span class="cn">3600</span> },
 })</code></pre>
         </div>
@@ -68,212 +87,256 @@
     </div>
   </section>
 
-  <!-- Providers strip -->
-  <section class="providers-section">
+  <!-- Provider Strip -->
+  <section class="providers">
     <p class="providers-label">
-      Works with every AI provider
+      Trusted by teams using
     </p>
-    <div class="providers-grid">
-      <span class="provider-name">OpenAI</span>
-      <span class="provider-sep" />
-      <span class="provider-name">Anthropic</span>
-      <span class="provider-sep" />
-      <span class="provider-name">Google</span>
-      <span class="provider-sep" />
-      <span class="provider-name">Mistral</span>
-      <span class="provider-sep" />
-      <span class="provider-name">Cohere</span>
-      <span class="provider-sep" />
-      <span class="provider-name">DeepSeek</span>
-      <span class="provider-sep" />
-      <span class="provider-name">Groq</span>
-      <span class="provider-sep" />
-      <span class="provider-name">AWS Bedrock</span>
-      <span class="provider-sep" />
-      <span class="provider-name">Azure</span>
-      <span class="provider-sep" />
-      <span class="provider-name">+9 more</span>
+    <div class="providers-row">
+      <span v-for="p in ['OpenAI', 'Anthropic', 'Google', 'Mistral', 'Cohere', 'DeepSeek', 'Groq', 'AWS Bedrock', 'Azure', '+9 more']" :key="p" class="provider">{{ p }}</span>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* Hero Section */
-.hero-section {
+/* ---- Hero Section ---- */
+.hero {
   position: relative;
   overflow: hidden;
-  padding: 80px 24px 60px;
-  min-height: 85vh;
+  padding: 100px 24px 80px;
+  min-height: 90vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.hero-grid {
+.hero-bg {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, black 30%, transparent 100%);
-}
-
-.hero-glow {
-  position: absolute;
-  top: -120px;
-  right: 10%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
   pointer-events: none;
 }
 
-.hero-container {
+.hero-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black 20%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 30%, black 20%, transparent 100%);
+}
+
+.hero-beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 234, 0.06) 0%, transparent 70%);
+}
+
+.hero-beam--2 {
+  width: 300px;
+  height: 600px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 212, 234, 0.03) 0%, transparent 70%);
+}
+
+.hero-inner {
   position: relative;
   max-width: 1200px;
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 64px;
+  gap: 80px;
   align-items: center;
 }
 
+/* ---- Content ---- */
 .hero-badge {
-  display: inline-block;
-  padding: 6px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
   border-radius: 100px;
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  background: rgba(0, 229, 255, 0.06);
-  color: #00E5FF;
-  font-size: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #a1a1aa;
+  font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.02em;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00d4ea;
+  box-shadow: 0 0 8px rgba(0, 212, 234, 0.4);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .hero-title {
-  font-size: 3.2rem;
+  font-size: 3.5rem;
   font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  color: #E2E8F0;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: #fafafa;
   margin: 0 0 20px;
 }
 
-.hero-gradient {
-  background: linear-gradient(135deg, #00E5FF 0%, #00B8D4 60%, #0097A7 100%);
+.hero-title-accent {
+  display: block;
+  background: linear-gradient(135deg, #00d4ea 0%, #00b8d4 50%, #0097a7 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.hero-tagline {
-  font-size: 1.1rem;
+.hero-desc {
+  font-size: 1.05rem;
   line-height: 1.7;
-  color: #94A3B8;
-  max-width: 480px;
+  color: #71717a;
+  max-width: 460px;
   margin: 0 0 32px;
 }
 
 .hero-actions {
   display: flex;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 28px;
 }
 
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  padding: 12px 28px;
-  background: #00E5FF;
-  color: #0A0F1E;
-  font-weight: 700;
-  font-size: 0.95rem;
+  gap: 6px;
+  padding: 11px 24px;
+  background: #fafafa;
+  color: #09090b;
+  font-weight: 600;
+  font-size: 0.9rem;
   border-radius: 8px;
   text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .btn-primary:hover {
-  background: #18FFFF;
-  box-shadow: 0 0 24px rgba(0, 229, 255, 0.3);
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
-.btn-outline {
+.btn-ghost {
   display: inline-flex;
   align-items: center;
-  padding: 12px 28px;
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  color: #00E5FF;
-  font-weight: 600;
-  font-size: 0.95rem;
+  padding: 11px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+  font-weight: 500;
+  font-size: 0.9rem;
   border-radius: 8px;
   text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.btn-outline:hover {
-  border-color: #00E5FF;
-  background: rgba(0, 229, 255, 0.06);
+.btn-ghost:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fafafa;
 }
 
+/* ---- Install Command ---- */
 .install-cmd {
   display: inline-flex;
-  padding: 10px 20px;
-  background: rgba(0, 229, 255, 0.04);
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
 }
 
-.install-cmd code {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+.install-cmd:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.install-prompt {
+  color: #00d4ea;
+  font-family: var(--vp-font-family-mono);
   font-size: 0.85rem;
-  color: #64748B;
+  font-weight: 600;
 }
 
-/* Code Window */
-.hero-code {
+.install-text {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.85rem;
+  color: #a1a1aa;
+}
+
+.install-copy {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  margin-left: 4px;
+}
+
+/* ---- Code Window ---- */
+.hero-visual {
   position: relative;
 }
 
 .code-window {
-  border-radius: 12px;
-  border: 1px solid rgba(0, 229, 255, 0.1);
-  background: #080C18;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #09090b;
   overflow: hidden;
   box-shadow:
-    0 0 0 1px rgba(0, 229, 255, 0.05),
-    0 20px 60px rgba(0, 0, 0, 0.4);
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 25px 80px rgba(0, 0, 0, 0.5);
 }
 
-.code-titlebar {
+.code-chrome {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 12px 16px;
-  background: rgba(0, 229, 255, 0.03);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+  gap: 8px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.code-dot {
+.code-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.code-dots span {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.code-dot--red { background: #FF5F57; }
-.code-dot--yellow { background: #FEBC2E; }
-.code-dot--green { background: #28C840; }
+.code-dots span:nth-child(1) { background: #ef4444; opacity: 0.7; }
+.code-dots span:nth-child(2) { background: #eab308; opacity: 0.7; }
+.code-dots span:nth-child(3) { background: #22c55e; opacity: 0.7; }
 
-.code-filename {
-  margin-left: 8px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  color: #475569;
+.code-file {
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.72rem;
+  color: #3f3f46;
+  margin-left: 6px;
 }
 
 .code-body {
@@ -283,208 +346,195 @@
 }
 
 .code-body code {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: var(--vp-font-family-mono);
   font-size: 0.82rem;
-  line-height: 1.7;
-  color: #CBD5E1;
+  line-height: 1.75;
+  color: #d4d4d8;
 }
 
-/* Syntax highlighting */
-.ck { color: #C792EA; }  /* keyword: import, const */
-.cf { color: #82AAFF; }  /* function */
-.cs { color: #C3E88D; }  /* string */
-.cn { color: #F78C6C; }  /* number */
-.cp { color: #89DDFF; }  /* property */
-.cv { color: #EEFFFF; }  /* variable */
+/* Syntax colors — muted, not screaming */
+.ck { color: #c084fc; }
+.cf { color: #7dd3fc; }
+.cs { color: #86efac; }
+.cn { color: #fbbf24; }
+.cp { color: #94a3b8; }
+.cv { color: #e2e8f0; }
 
-/* Providers Section */
-.providers-section {
-  padding: 40px 24px;
+/* ---- Providers ---- */
+.providers {
+  padding: 48px 24px;
   text-align: center;
-  border-top: 1px solid rgba(0, 229, 255, 0.06);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .providers-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #3f3f46;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   margin: 0 0 20px;
 }
 
-.providers-grid {
+.providers-row {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 8px 4px;
+  gap: 6px;
 }
 
-.provider-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #64748B;
-  padding: 0 12px;
-  transition: color 0.2s;
-  cursor: default;
+.provider {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #52525b;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
 }
 
-.provider-name:hover {
-  color: #00E5FF;
+.provider:hover {
+  color: #a1a1aa;
 }
 
-.provider-sep {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #334155;
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .hero-container {
+/* ---- Responsive ---- */
+@media (max-width: 960px) {
+  .hero-inner {
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 48px;
+    text-align: center;
   }
 
-  .hero-title {
-    font-size: 2.4rem;
-  }
-
-  .hero-code {
-    max-width: 100%;
-  }
+  .hero-title { font-size: 2.6rem; }
+  .hero-desc { margin-inline: auto; }
+  .hero-actions { justify-content: center; }
+  .install-cmd { margin-inline: auto; }
 }
 
 @media (max-width: 480px) {
-  .hero-title {
-    font-size: 1.8rem;
-  }
-
-  .hero-actions {
-    flex-direction: column;
-  }
-
-  .code-body code {
-    font-size: 0.72rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-glow {
-    display: none;
-  }
+  .hero { padding: 80px 16px 60px; }
+  .hero-title { font-size: 2rem; }
+  .hero-actions { flex-direction: column; }
+  .code-body code { font-size: 0.72rem; }
 }
 </style>
 
-<!-- Light mode overrides (unscoped for html.dark targeting) -->
+<!-- Light mode overrides (unscoped to target html:not(.dark)) -->
 <style>
-html:not(.dark) .hero-section .hero-grid {
-  background-image:
-    linear-gradient(rgba(0, 184, 212, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 184, 212, 0.08) 1px, transparent 1px);
+html:not(.dark) .hero {
+  background: #fff;
 }
 
-html:not(.dark) .hero-section .hero-glow {
-  background: radial-gradient(circle, rgba(0, 184, 212, 0.06) 0%, transparent 70%);
+html:not(.dark) .hero-dots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
 }
 
-html:not(.dark) .hero-section .hero-badge {
-  border-color: rgba(0, 184, 212, 0.35);
-  background: rgba(0, 184, 212, 0.1);
-  color: #0097A7;
+html:not(.dark) .hero-beam {
+  background: radial-gradient(ellipse at 50% 0%, rgba(0, 184, 212, 0.06) 0%, transparent 70%);
 }
 
-html:not(.dark) .hero-section .hero-title {
-  color: #0F172A;
+html:not(.dark) .hero-badge {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 184, 212, 0.06);
+  color: #0097a7;
 }
 
-html:not(.dark) .hero-section .hero-gradient {
-  background: linear-gradient(135deg, #00B8D4 0%, #0097A7 60%, #00838F 100%);
+html:not(.dark) .hero-title {
+  color: #09090b;
+}
+
+html:not(.dark) .hero-title-accent {
+  background: linear-gradient(135deg, #0097a7 0%, #00838f 50%, #006064 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
 
-html:not(.dark) .hero-section .hero-tagline {
-  color: #475569;
+html:not(.dark) .hero-desc {
+  color: #52525b;
 }
 
-html:not(.dark) .hero-section .btn-primary {
-  background: #00B8D4;
-  color: #FFFFFF;
+html:not(.dark) .btn-primary {
+  background: #09090b;
+  color: #fafafa;
 }
 
-html:not(.dark) .hero-section .btn-primary:hover {
-  background: #0097A7;
-  box-shadow: 0 0 24px rgba(0, 184, 212, 0.25);
+html:not(.dark) .btn-primary:hover {
+  background: #18181b;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
-html:not(.dark) .hero-section .btn-outline {
-  border-color: rgba(0, 184, 212, 0.4);
-  color: #0097A7;
+html:not(.dark) .btn-ghost {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #52525b;
 }
 
-html:not(.dark) .hero-section .btn-outline:hover {
-  border-color: #00B8D4;
-  background: rgba(0, 184, 212, 0.08);
+html:not(.dark) .btn-ghost:hover {
+  border-color: rgba(0, 0, 0, 0.25);
+  color: #09090b;
 }
 
-html:not(.dark) .hero-section .install-cmd {
-  background: rgba(0, 184, 212, 0.06);
-  border-color: rgba(0, 184, 212, 0.18);
+html:not(.dark) .install-cmd {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
-html:not(.dark) .hero-section .install-cmd code {
-  color: #475569;
+html:not(.dark) .install-cmd:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.05);
 }
 
-html:not(.dark) .hero-section .code-window {
-  background: #F8FAFC;
-  border-color: #E2E8F0;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+html:not(.dark) .install-prompt {
+  color: #0097a7;
 }
 
-html:not(.dark) .hero-section .code-titlebar {
-  background: rgba(0, 0, 0, 0.02);
-  border-bottom-color: #E2E8F0;
+html:not(.dark) .install-text {
+  color: #52525b;
 }
 
-html:not(.dark) .hero-section .code-filename {
-  color: #94A3B8;
+html:not(.dark) .install-copy {
+  color: #a1a1aa;
+  background: rgba(0, 0, 0, 0.04);
 }
 
-html:not(.dark) .hero-section .code-body code {
-  color: #334155;
+html:not(.dark) .code-window {
+  background: #fafafa;
+  border-color: #e4e4e7;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.08);
+}
+
+html:not(.dark) .code-chrome {
+  border-bottom-color: #e4e4e7;
+}
+
+html:not(.dark) .code-file {
+  color: #a1a1aa;
+}
+
+html:not(.dark) .code-body code {
+  color: #3f3f46;
 }
 
 /* Light mode syntax highlighting */
-html:not(.dark) .hero-section .ck { color: #7C3AED; }
-html:not(.dark) .hero-section .cf { color: #2563EB; }
-html:not(.dark) .hero-section .cs { color: #059669; }
-html:not(.dark) .hero-section .cn { color: #EA580C; }
-html:not(.dark) .hero-section .cp { color: #0891B2; }
-html:not(.dark) .hero-section .cv { color: #0F172A; }
+html:not(.dark) .ck { color: #7c3aed; }
+html:not(.dark) .cf { color: #2563eb; }
+html:not(.dark) .cs { color: #059669; }
+html:not(.dark) .cn { color: #d97706; }
+html:not(.dark) .cp { color: #64748b; }
+html:not(.dark) .cv { color: #0f172a; }
 
-/* Providers section light mode */
-html:not(.dark) .providers-section {
-  border-color: rgba(0, 184, 212, 0.1);
+html:not(.dark) .providers {
+  border-top-color: rgba(0, 0, 0, 0.06);
 }
 
-html:not(.dark) .providers-section .providers-label {
-  color: #64748B;
+html:not(.dark) .providers-label {
+  color: #a1a1aa;
 }
 
-html:not(.dark) .providers-section .provider-name {
-  color: #475569;
+html:not(.dark) .provider {
+  color: #71717a;
 }
 
-html:not(.dark) .providers-section .provider-name:hover {
-  color: #0097A7;
-}
-
-html:not(.dark) .providers-section .provider-sep {
-  background: #CBD5E1;
+html:not(.dark) .provider:hover {
+  color: #09090b;
 }
 </style>

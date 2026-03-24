@@ -1,23 +1,23 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'ai-armor',
+  title: 'AI ARMOR',
   description: 'Production AI Toolkit for TypeScript -- rate limiting, cost tracking, caching, safety guardrails',
   base: '/ai-armor/',
   appearance: 'dark',
   head: [
-    ['link', { rel: 'icon', type: 'image/png', href: '/ai-armor/favicon.png' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/ai-armor/favicon.svg' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.googleapis.com' }],
     ['link', { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' }],
-    ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap', rel: 'stylesheet' }],
+    ['link', { href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap', rel: 'stylesheet' }],
     ['meta', { name: 'theme-color', content: '#00E5FF' }],
     ['meta', { property: 'og:type', content: 'website' }],
-    ['meta', { property: 'og:title', content: 'ai-armor -- Production AI Toolkit for TypeScript' }],
+    ['meta', { property: 'og:title', content: 'AI ARMOR -- Production AI Toolkit for TypeScript' }],
     ['meta', { property: 'og:description', content: 'Rate limiting, cost tracking, caching, model routing, and safety guardrails for AI APIs. Works with OpenAI, Anthropic, Google, and 15+ providers.' }],
   ],
   themeConfig: {
-    logo: '/logo-small.png',
-    siteTitle: false,
+    logo: '/logo-shield.svg',
+    siteTitle: 'AI ARMOR',
     search: {
       provider: 'local',
     },
@@ -31,7 +31,7 @@ export default defineConfig({
         text: 'Guide',
         items: [
           { text: 'Getting Started', link: '/guide/getting-started' },
-          { text: 'Why ai-armor?', link: '/guide/why' },
+          { text: 'Why AI ARMOR?', link: '/guide/why' },
           { text: 'Rate Limiting', link: '/guide/rate-limiting' },
           { text: 'Cost Tracking', link: '/guide/cost-tracking' },
           { text: 'Caching', link: '/guide/caching' },
