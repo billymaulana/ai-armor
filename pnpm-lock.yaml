@@ -67,7 +67,7 @@ importers:
         specifier: ^3.16.0 || ^4.0.0
         version: 4.4.2
       ai-armor:
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../core
     devDependencies:
       '@nuxt/module-builder':
