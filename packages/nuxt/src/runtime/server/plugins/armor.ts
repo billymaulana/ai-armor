@@ -1,6 +1,6 @@
+import { useRuntimeConfig } from '#imports'
 import { createArmor } from 'ai-armor'
 import { defineNitroPlugin } from 'nitropack/runtime'
-import { useRuntimeConfig } from '#imports'
 import { initArmor } from '../utils/armor'
 
 export default defineNitroPlugin(() => {

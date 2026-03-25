@@ -1,5 +1,5 @@
-import { createError, defineEventHandler, getRequestHeader, getRequestIP, readBody } from 'h3'
 import { useRuntimeConfig } from '#imports'
+import { createError, defineEventHandler, getRequestHeader, getRequestIP, readBody } from 'h3'
 import { useArmorInstance } from '../../utils/armor'
 
 export default defineEventHandler(async (event) => {
