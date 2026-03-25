@@ -29,7 +29,7 @@ export default defineNuxtConfig({
     routing: {
       aliases: {
         fast: 'gpt-4o-mini',
-        smart: 'gpt-4o',
+        balanced: 'gpt-4o',
         best: 'claude-sonnet-4-20250514',
       },
     },

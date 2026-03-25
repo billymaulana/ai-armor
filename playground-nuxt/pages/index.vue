@@ -115,8 +115,8 @@ async function send() {
               <option value="fast">
                 fast (gpt-4o-mini)
               </option>
-              <option value="smart">
-                smart (gpt-4o)
+              <option value="balanced">
+                balanced (gpt-4o)
               </option>
               <option value="best">
                 best (claude-sonnet)

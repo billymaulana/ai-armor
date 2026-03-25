@@ -3,16 +3,19 @@
 
 <template>
   <div class="min-h-screen bg-gray-50">
-    <header class="bg-white border-b border-gray-200 px-6 py-4">
+    <header class="bg-slate-900 border-b border-slate-700 px-6 py-4">
       <div class="max-w-6xl mx-auto flex items-center justify-between">
-        <h1 class="text-xl font-bold text-gray-900">
-          ai-armor Playground
-        </h1>
+        <div class="flex items-center gap-3">
+          <img src="/logo-dark.svg" alt="AI-ARMOR" class="h-8">
+          <h1 class="text-xl font-bold text-cyan-400">
+            Playground
+          </h1>
+        </div>
         <nav class="flex gap-4">
-          <NuxtLink to="/" class="text-sm text-gray-600 hover:text-gray-900" active-class="text-blue-600 font-medium">
+          <NuxtLink to="/" class="text-sm text-slate-400 hover:text-white" active-class="text-cyan-400 font-medium">
             Chat Demo
           </NuxtLink>
-          <NuxtLink to="/dashboard" class="text-sm text-gray-600 hover:text-gray-900" active-class="text-blue-600 font-medium">
+          <NuxtLink to="/dashboard" class="text-sm text-slate-400 hover:text-white" active-class="text-cyan-400 font-medium">
             Dashboard
           </NuxtLink>
         </nav>
