@@ -1,7 +1,7 @@
 {
   "name": "@ai-armor/nuxt",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Nuxt module for ai-armor -- production AI toolkit with rate limiting, cost tracking, fallback, caching, and safety guardrails for Nuxt 3/4",
   "author": "billymaulana",
   "license": "MIT",
