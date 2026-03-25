@@ -1,7 +1,7 @@
 {
   "name": "ai-armor",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Production AI toolkit for TypeScript -- rate limiting, cost tracking, fallback, caching, safety",
   "author": "billymaulana",
   "license": "MIT",

@@ -1,5 +1,14 @@
 # @ai-armor/nuxt
 
+## 0.1.2
+
+### Patch Changes
+
+- [`80208a0`](https://github.com/billymaulana/ai-armor/commit/80208a04cadad9ef24555621411c8adc0cfd98e2) Thanks [@billymaulana](https://github.com/billymaulana)! - Sync API docs with source code, fix logo transparency, improve test coverage to 99.6%
+
+- Updated dependencies [[`80208a0`](https://github.com/billymaulana/ai-armor/commit/80208a04cadad9ef24555621411c8adc0cfd98e2)]:
+  - ai-armor@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
