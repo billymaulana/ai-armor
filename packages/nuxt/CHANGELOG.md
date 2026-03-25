@@ -1,5 +1,14 @@
 # @ai-armor/nuxt
 
+## 0.1.3
+
+### Patch Changes
+
+- fix(nuxt): add explicit import for defineNitroPlugin in server plugin
+
+- Updated dependencies []:
+  - ai-armor@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes
