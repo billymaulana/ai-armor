@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Ultra minimal shield - single line weight -->
+  <path d="M100 18 C74 18 48 26 32 34 L38 138 C44 166 68 186 100 200 C132 186 156 166 162 138 L168 34 C152 26 126 18 100 18Z" fill="none" stroke="#22d3ee" stroke-width="2"/>
+  <!-- Minimal checkmark/shield verified -->
+  <path d="M75 105 L92 122 L128 78" fill="none" stroke="#22d3ee" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

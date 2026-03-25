@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield with wings -->
+  <!-- Wings left -->
+  <path d="M70 80 C50 65 25 60 10 65 C20 80 30 100 45 110 C55 116 65 118 70 115" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+  <path d="M68 90 C48 78 28 75 15 78 C25 90 35 105 48 112" fill="none" stroke="#0e7490" stroke-width="1" opacity="0.6"/>
+  <!-- Wings right -->
+  <path d="M130 80 C150 65 175 60 190 65 C180 80 170 100 155 110 C145 116 135 118 130 115" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+  <path d="M132 90 C152 78 172 75 185 78 C175 90 165 105 152 112" fill="none" stroke="#0e7490" stroke-width="1" opacity="0.6"/>
+  <!-- Center shield -->
+  <path d="M100 40 C86 40 72 44 62 48 L66 126 C70 146 82 158 100 168 C118 158 130 146 134 126 L138 48 C128 44 114 40 100 40Z" fill="#09090b" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- AIA -->
+  <text x="100" y="115" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="28" font-weight="800" fill="#22d3ee">AIA</text>
+</svg>

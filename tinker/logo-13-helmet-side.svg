@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Spartan/side helmet profile -->
+  <!-- Helm shape -->
+  <path d="M120 30 C80 30 55 50 50 80 L45 110 C42 130 50 150 65 160 L80 170 L140 170 L150 155 C160 140 165 120 162 100 L158 70 C155 45 140 30 120 30Z" fill="#0f172a" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Crest/plume -->
+  <path d="M120 30 C125 20 135 15 145 18 C155 22 158 35 155 50 L150 65" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+  <!-- Eye opening -->
+  <path d="M55 95 L130 90 L125 108 L60 110Z" fill="#09090b" stroke="#0e7490" stroke-width="1.5"/>
+  <!-- Eye glow -->
+  <ellipse cx="90" cy="100" rx="14" ry="5" fill="#22d3ee" opacity="0.8"/>
+  <!-- Chin guard -->
+  <path d="M65 130 L55 150 L70 160 L90 165" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+  <!-- Nose guard -->
+  <path d="M55 95 L42 105 L50 115" fill="#0f172a" stroke="#22d3ee" stroke-width="2"/>
+</svg>

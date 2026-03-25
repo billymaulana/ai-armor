@@ -1,5 +1,14 @@
 # @ai-armor/nuxt
 
+## 0.1.4
+
+### Patch Changes
+
+- fix(nuxt): resolve workspace protocol for npm publish
+
+- Updated dependencies []:
+  - ai-armor@0.1.4
+
 ## 0.1.3
 
 ### Patch Changes

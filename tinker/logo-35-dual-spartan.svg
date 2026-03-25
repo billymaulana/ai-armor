@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Two mirrored Spartan helmets forming a shield/crest shape -->
+  <!-- Left helmet profile (facing right) -->
+  <path d="M100 20
+           L72 28
+           C52 36 38 56 36 78
+           L34 98
+           C32 110 38 122 48 128
+           L34 130
+           L38 140
+           L52 138
+           L56 130
+           L56 164
+           L72 164
+           L72 146
+           L78 140
+           L78 164
+           L100 164"
+        fill="#0f172a" stroke="#22d3ee" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Right helmet profile (facing left, mirrored) -->
+  <path d="M100 20
+           L128 28
+           C148 36 162 56 164 78
+           L166 98
+           C168 110 162 122 152 128
+           L166 130
+           L162 140
+           L148 138
+           L144 130
+           L144 164
+           L128 164
+           L128 146
+           L122 140
+           L122 164
+           L100 164"
+        fill="#0f172a" stroke="#22d3ee" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Shared crest -->
+  <rect x="92" y="8" width="16" height="18" rx="6" fill="#22d3ee"/>
+  <!-- Left eye -->
+  <ellipse cx="68" cy="88" rx="12" ry="4" fill="#22d3ee" opacity="0.7"/>
+  <!-- Right eye -->
+  <ellipse cx="132" cy="88" rx="12" ry="4" fill="#22d3ee" opacity="0.7"/>
+  <!-- Center divide — the nose guards meet -->
+  <line x1="100" y1="20" x2="100" y2="164" stroke="#0e7490" stroke-width="1.5" opacity="0.4"/>
+  <!-- Visor lines -->
+  <line x1="40" y1="84" x2="96" y2="84" stroke="#09090b" stroke-width="10"/>
+  <line x1="104" y1="84" x2="160" y2="84" stroke="#09090b" stroke-width="10"/>
+  <!-- Bottom text -->
+  <text x="100" y="190" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="13" font-weight="800" letter-spacing="6" fill="#22d3ee">AI ARMOR</text>
+</svg>

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Spartan helmet side profile — bold silhouette like Spartan Race logo -->
+  <!-- Entire helmet as one strong path -->
+  <path d="M130 18
+           C130 10 120 4 108 4
+           L92 4
+           C80 4 70 10 70 18
+           L70 28
+           C48 34 32 52 28 76
+           L24 100
+           C22 114 26 128 36 138
+           L22 140
+           C18 142 16 148 18 154
+           L26 162
+           L44 162
+           L52 154
+           L68 154
+           L68 164
+           C68 172 76 180 88 182
+           L118 182
+           C128 180 134 174 136 164
+           L136 148
+           L146 138
+           C156 128 162 114 160 100
+           L158 82
+           C156 58 146 40 132 32
+           L130 28Z"
+        fill="#0f172a"/>
+  <!-- Helmet outline -->
+  <path d="M130 18
+           C130 10 120 4 108 4
+           L92 4
+           C80 4 70 10 70 18
+           L70 28
+           C48 34 32 52 28 76
+           L24 100
+           C22 114 26 128 36 138
+           L22 140
+           C18 142 16 148 18 154
+           L26 162
+           L44 162
+           L52 154
+           L68 154
+           L68 164
+           C68 172 76 180 88 182
+           L118 182
+           C128 180 134 174 136 164
+           L136 148
+           L146 138
+           C156 128 162 114 160 100
+           L158 82
+           C156 58 146 40 132 32
+           L130 28Z"
+        fill="none" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Crest / plume -->
+  <path d="M72 28 L70 18 C70 10 80 4 92 4 L108 4 C120 4 130 10 130 18 L128 28"
+        fill="#22d3ee"/>
+  <!-- Crest hair/plume extending -->
+  <rect x="86" y="0" width="28" height="28" rx="8" fill="#22d3ee"/>
+  <!-- Eye slit -->
+  <path d="M36 96 L140 92 L138 108 L40 110Z" fill="#09090b"/>
+  <!-- Eye glow -->
+  <ellipse cx="88" cy="101" rx="22" ry="5" fill="#22d3ee" opacity="0.8"/>
+  <!-- Nose guard -->
+  <path d="M36 96 L22 106 L28 118 L40 110" fill="#0f172a" stroke="#22d3ee" stroke-width="2"/>
+</svg>

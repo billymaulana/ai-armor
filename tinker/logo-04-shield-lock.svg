@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield with keyhole -->
+  <path d="M100 12 C72 12 44 20 24 30 C20 32 18 36 18 40 L26 140 C32 172 60 192 100 210 C140 192 168 172 174 140 L182 40 C182 36 180 32 176 30 C156 20 128 12 100 12Z" fill="#09090b" stroke="#22d3ee" stroke-width="3"/>
+  <!-- Lock body -->
+  <rect x="78" y="100" width="44" height="40" rx="6" fill="#0f172a" stroke="#22d3ee" stroke-width="2"/>
+  <!-- Lock shackle -->
+  <path d="M82 100 L82 80 C82 65 92 55 100 55 C108 55 118 65 118 80 L118 100" fill="none" stroke="#22d3ee" stroke-width="3"/>
+  <!-- Keyhole -->
+  <circle cx="100" cy="116" r="6" fill="#22d3ee"/>
+  <path d="M97 118 L97 132 L103 132 L103 118" fill="#22d3ee"/>
+</svg>

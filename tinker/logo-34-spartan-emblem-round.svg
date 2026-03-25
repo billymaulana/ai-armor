@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Round emblem / badge with Spartan helmet profile -->
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="90" fill="#09090b" stroke="#22d3ee" stroke-width="3"/>
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#0e7490" stroke-width="1"/>
+  <!-- Spartan helmet profile (facing right) — clean silhouette -->
+  <path d="M90 30
+           C70 30 54 42 50 62
+           L46 82
+           C44 92 46 102 52 108
+           L38 108
+           C34 110 34 118 38 120
+           L52 124
+           L52 152
+           C52 158 56 162 62 162
+           L74 162
+           L74 144
+           L80 138
+           L80 162
+           L106 162
+           L106 138
+           L112 136
+           C120 130 126 120 126 108
+           L128 82
+           C130 60 118 38 100 32
+           L90 30Z"
+        fill="#22d3ee"/>
+  <!-- Visor cutout -->
+  <path d="M48 86 L122 82 L120 96 L50 100Z" fill="#09090b"/>
+  <!-- Eye -->
+  <ellipse cx="84" cy="91" rx="14" ry="4.5" fill="#0e7490" opacity="0.5"/>
+  <!-- Crest -->
+  <rect x="82" y="22" width="14" height="14" rx="5" fill="#22d3ee"/>
+  <!-- Text arc at bottom -->
+  <text x="100" y="190" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="11" font-weight="700" letter-spacing="4" fill="#0e7490">AI-ARMOR</text>
+</svg>

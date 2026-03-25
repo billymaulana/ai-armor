@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-ARMOR — Spartan Concepts</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card: #111113;
+      --border: #27272a;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --accent: #22d3ee;
+    }
+    .light {
+      --bg: #fafafa;
+      --card: #ffffff;
+      --border: #e4e4e7;
+      --text: #09090b;
+      --muted: #71717a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    .header {
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .header p { color: var(--muted); margin-top: 0.5rem; font-size: 0.95rem; }
+    .controls {
+      display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem;
+    }
+    .toggle-btn {
+      background: var(--card); border: 1px solid var(--border); color: var(--text);
+      padding: 0.5rem 1.2rem; border-radius: 6px; cursor: pointer;
+      font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+    }
+    .toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .toggle-btn.active { background: var(--accent); color: #09090b; border-color: var(--accent); }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem; padding: 2rem; max-width: 1400px; margin: 0 auto;
+    }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 1.5rem; text-align: center; transition: all 0.2s; cursor: pointer;
+    }
+    .card:hover {
+      border-color: var(--accent); transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(34,211,238,0.1);
+    }
+    .card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+    .card-img { width: 200px; height: 200px; margin: 0 auto 1rem; }
+    .card-img img { width: 100%; height: 100%; object-fit: contain; }
+    .card-num {
+      display: inline-block; background: var(--accent); color: #09090b;
+      font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem;
+      border-radius: 4px; margin-bottom: 0.5rem;
+    }
+    .card-name { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-top: 0.3rem; }
+    .card-desc { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+    .footer {
+      text-align: center; padding: 2rem; color: var(--muted);
+      font-size: 0.8rem; border-top: 1px solid var(--border);
+    }
+    .section-divider {
+      grid-column: 1 / -1; padding: 1rem 0 0;
+    }
+    .section-divider h2 {
+      font-size: 1rem; font-weight: 700; color: var(--accent);
+      letter-spacing: 0.05em; text-transform: uppercase;
+    }
+    .section-divider p { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>AI-ARMOR — Spartan Concepts</h1>
+    <p>10 Spartan/Armor focused designs — No AI slop</p>
+    <div class="controls">
+      <button class="toggle-btn active" onclick="setMode('dark')">Dark Mode</button>
+      <button class="toggle-btn" onclick="setMode('light')">Light Mode</button>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="section-divider">
+      <h2>Spartan Helmets</h2>
+      <p>Iconic silhouettes — recognizable at any size</p>
+    </div>
+
+    <div class="card" data-num="26">
+      <div class="card-num">#26</div>
+      <div class="card-img"><img src="logo-26-spartan-classic.svg" alt="Spartan Classic"></div>
+      <div class="card-name">Classic Spartan Front</div>
+      <div class="card-desc">T-visor, crest, cheek guards, breather grill</div>
+    </div>
+
+    <div class="card" data-num="28">
+      <div class="card-num">#28</div>
+      <div class="card-img"><img src="logo-28-spartan-profile-bold.svg" alt="Spartan Profile"></div>
+      <div class="card-name">Side Profile — Bold</div>
+      <div class="card-desc">Strong silhouette like Spartan Race logo</div>
+    </div>
+
+    <div class="card" data-num="30">
+      <div class="card-num">#30</div>
+      <div class="card-img"><img src="logo-30-spartan-minimal.svg" alt="Spartan Minimal"></div>
+      <div class="card-name">Minimal Line Helmet</div>
+      <div class="card-desc">Single stroke outline, T-visor recognition point</div>
+    </div>
+
+    <div class="card" data-num="31">
+      <div class="card-num">#31</div>
+      <div class="card-img"><img src="logo-31-spartan-face-filled.svg" alt="Spartan Filled"></div>
+      <div class="card-name">Solid Fill Helmet</div>
+      <div class="card-desc">Shape IS the logo — cyan filled, dark visor cutout</div>
+    </div>
+
+    <div class="card" data-num="33">
+      <div class="card-num">#33</div>
+      <div class="card-img"><img src="logo-33-spartan-angular.svg" alt="Spartan Angular"></div>
+      <div class="card-name">Angular / Faceted</div>
+      <div class="card-desc">Low-poly feel, sharp edges — not rounded</div>
+    </div>
+
+    <div class="section-divider">
+      <h2>Shield + Spartan Combos</h2>
+      <p>Combining shield shape with Spartan elements</p>
+    </div>
+
+    <div class="card" data-num="27">
+      <div class="card-num">#27</div>
+      <div class="card-img"><img src="logo-27-spartan-lambda.svg" alt="Lambda Shield"></div>
+      <div class="card-name">Lambda (L) Shield</div>
+      <div class="card-desc">Round hoplon shield + Lambda = A for AI-ARMOR</div>
+    </div>
+
+    <div class="card" data-num="29">
+      <div class="card-num">#29</div>
+      <div class="card-img"><img src="logo-29-spartan-shield-emblem.svg" alt="Shield Emblem"></div>
+      <div class="card-name">Shield + Helmet Inside</div>
+      <div class="card-desc">Pointed shield with Spartan face embedded</div>
+    </div>
+
+    <div class="card" data-num="32">
+      <div class="card-num">#32</div>
+      <div class="card-img"><img src="logo-32-helm-shield-combo.svg" alt="Helm Shield Combo"></div>
+      <div class="card-name">Helmet-Top Shield</div>
+      <div class="card-desc">Shield where top forms helmet, Lambda/A on body</div>
+    </div>
+
+    <div class="card" data-num="34">
+      <div class="card-num">#34</div>
+      <div class="card-img"><img src="logo-34-spartan-emblem-round.svg" alt="Round Emblem"></div>
+      <div class="card-name">Round Badge + Profile</div>
+      <div class="card-desc">Helmet silhouette in circular emblem</div>
+    </div>
+
+    <div class="card" data-num="35">
+      <div class="card-num">#35</div>
+      <div class="card-img"><img src="logo-35-dual-spartan.svg" alt="Dual Spartan"></div>
+      <div class="card-name">Dual Mirrored Helmets</div>
+      <div class="card-desc">Two profiles facing out, forming crest shape</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    AI-ARMOR Spartan Concepts — Pick a number to continue
+  </div>
+
+  <script>
+    function setMode(mode) {
+      document.body.classList.toggle('light', mode === 'light');
+      document.querySelectorAll('.toggle-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+    document.querySelectorAll('.card').forEach(function(card) {
+      card.addEventListener('click', function() {
+        document.querySelectorAll('.card').forEach(function(c) { c.classList.remove('selected'); });
+        card.classList.add('selected');
+      });
+    });
+  </script>
+</body>
+</html>

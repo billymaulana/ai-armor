@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Hexagonal shield -->
+  <path d="M100 10 L170 45 L170 115 L100 190 L30 115 L30 45Z" fill="#09090b" stroke="#22d3ee" stroke-width="3"/>
+  <!-- Inner hex -->
+  <path d="M100 30 L152 56 L152 108 L100 170 L48 108 L48 56Z" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+  <!-- AIA text -->
+  <text x="100" y="112" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="42" font-weight="800" letter-spacing="-1" fill="#22d3ee">AIA</text>
+  <!-- Scan lines -->
+  <line x1="60" y1="70" x2="140" y2="70" stroke="#22d3ee" stroke-width="0.5" opacity="0.4"/>
+  <line x1="55" y1="130" x2="145" y2="130" stroke="#22d3ee" stroke-width="0.5" opacity="0.4"/>
+</svg>

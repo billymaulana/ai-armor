@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Layered shields (depth effect) -->
+  <!-- Back shield -->
+  <path d="M100 22 C76 22 52 28 36 36 L42 130 C48 158 70 176 100 190 C130 176 152 158 158 130 L164 36 C148 28 124 22 100 22Z" fill="#0e7490" opacity="0.3"/>
+  <!-- Mid shield -->
+  <path d="M100 30 C78 30 56 36 42 42 L48 132 C52 158 72 174 100 186 C128 174 148 158 152 132 L158 42 C144 36 122 30 100 30Z" fill="#0e7490" opacity="0.5"/>
+  <!-- Front shield -->
+  <path d="M100 38 C80 38 62 42 48 48 L54 134 C58 156 74 170 100 182 C126 170 142 156 146 134 L152 48 C138 42 120 38 100 38Z" fill="#09090b" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Center mark -->
+  <text x="100" y="122" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="38" font-weight="800" fill="#22d3ee">AIA</text>
+</svg>

@@ -1,5 +1,11 @@
 # ai-armor
 
+## 0.1.4
+
+### Patch Changes
+
+- fix(nuxt): resolve workspace protocol for npm publish
+
 ## 0.1.3
 
 ### Patch Changes

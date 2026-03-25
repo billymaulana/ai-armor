@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Knight face front - geometric/modern -->
+  <!-- Head shape -->
+  <path d="M100 15 C65 15 42 40 40 70 L38 105 C36 135 52 160 75 170 L85 174 C90 176 95 178 100 178 C105 178 110 176 115 174 L125 170 C148 160 164 135 162 105 L160 70 C158 40 135 15 100 15Z" fill="#0f172a" stroke="#22d3ee" stroke-width="2"/>
+  <!-- Crown/crest -->
+  <path d="M70 28 L85 15 L100 22 L115 15 L130 28" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+  <!-- Visor -->
+  <path d="M52 85 L148 85 L144 106 L56 106Z" fill="#09090b" stroke="#0e7490" stroke-width="1.5"/>
+  <!-- Eyes -->
+  <path d="M68 90 L88 88 L86 102 L66 100Z" fill="#22d3ee" opacity="0.9"/>
+  <path d="M112 88 L132 90 L134 100 L114 102Z" fill="#22d3ee" opacity="0.9"/>
+  <!-- Nose guard -->
+  <line x1="100" y1="82" x2="100" y2="110" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Mouth grill -->
+  <line x1="80" y1="125" x2="120" y2="125" stroke="#0e7490" stroke-width="1"/>
+  <line x1="82" y1="132" x2="118" y2="132" stroke="#0e7490" stroke-width="1"/>
+  <line x1="85" y1="139" x2="115" y2="139" stroke="#0e7490" stroke-width="1"/>
+  <!-- Cheek plates -->
+  <path d="M48 95 L38 120 L52 140 L60 130" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+  <path d="M152 95 L162 120 L148 140 L140 130" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+</svg>

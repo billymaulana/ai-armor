@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield with Lambda (Λ) — Spartan warriors painted Λ on shields -->
+  <!-- Λ also reads as "A" for AI-ARMOR — double meaning -->
+  <!-- Rounded shield (aspis/hoplon shape) -->
+  <circle cx="100" cy="105" r="82" fill="#0f172a" stroke="#22d3ee" stroke-width="3.5"/>
+  <!-- Shield rim detail -->
+  <circle cx="100" cy="105" r="74" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="100" cy="105" r="70" fill="none" stroke="#0e7490" stroke-width="0.5"/>
+  <!-- Lambda / A — hand-drawn feel, not perfect geometry -->
+  <path d="M100 36
+           L56 174
+           L72 174
+           L100 72
+           L128 174
+           L144 174
+           Z"
+        fill="#22d3ee"/>
+  <!-- Lambda crossbar suggesting "A" -->
+  <path d="M76 140 L124 140" stroke="#0f172a" stroke-width="8"/>
+  <!-- Battle wear — small notch on shield rim -->
+  <path d="M168 70 L176 65 L172 78" fill="none" stroke="#22d3ee" stroke-width="2"/>
+  <path d="M28 130 L22 125 L30 120" fill="none" stroke="#0e7490" stroke-width="1.5"/>
+</svg>

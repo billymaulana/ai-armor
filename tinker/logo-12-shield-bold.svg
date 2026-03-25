@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Ultra bold shield with thick stroke -->
+  <path d="M100 16 C74 16 48 24 30 32 C26 34 24 38 24 42 L32 138 C36 166 62 186 100 204 C138 186 164 166 168 138 L176 42 C176 38 174 34 170 32 C152 24 126 16 100 16Z" fill="#22d3ee"/>
+  <!-- Inner cutout -->
+  <path d="M100 28 C78 28 56 34 42 40 L48 136 C52 160 72 176 100 192 C128 176 148 160 152 136 L158 40 C144 34 122 28 100 28Z" fill="#09090b"/>
+  <!-- AIA monogram -->
+  <text x="100" y="124" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="48" font-weight="900" letter-spacing="-1" fill="#22d3ee">AIA</text>
+</svg>

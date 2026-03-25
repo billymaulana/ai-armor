@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield with chevron stripes -->
+  <path d="M100 12 C72 12 44 20 24 30 C20 32 18 36 18 40 L26 140 C32 172 60 192 100 210 C140 192 168 172 174 140 L182 40 C182 36 180 32 176 30 C156 20 128 12 100 12Z" fill="#09090b" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Chevrons -->
+  <path d="M60 60 L100 85 L140 60" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>
+  <path d="M60 85 L100 110 L140 85" fill="none" stroke="#0e7490" stroke-width="3" stroke-linecap="round"/>
+  <path d="M60 110 L100 135 L140 110" fill="none" stroke="#22d3ee" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+  <!-- Bottom point accent -->
+  <circle cx="100" cy="170" r="4" fill="#22d3ee"/>
+</svg>

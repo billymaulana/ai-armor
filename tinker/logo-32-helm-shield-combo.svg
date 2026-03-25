@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield shape where the TOP forms a helmet silhouette -->
+  <!-- Shield body -->
+  <path d="M100 8
+           C68 8 38 16 24 26
+           L32 148
+           C38 174 66 194 100 210
+           C134 194 162 174 168 148
+           L176 26
+           C162 16 132 8 100 8Z"
+        fill="#09090b" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Helmet shape integrated into top of shield -->
+  <path d="M60 60
+           C60 36 76 18 100 18
+           C124 18 140 36 140 60
+           L140 76
+           L60 76Z"
+        fill="#0f172a"/>
+  <!-- Crest -->
+  <rect x="92" y="8" width="16" height="16" rx="6" fill="#22d3ee"/>
+  <!-- Visor -->
+  <rect x="56" y="56" width="88" height="14" rx="2" fill="#09090b"/>
+  <rect x="92" y="46" width="16" height="28" rx="2" fill="#09090b"/>
+  <!-- Eyes in visor -->
+  <ellipse cx="76" cy="63" rx="12" ry="4" fill="#22d3ee" opacity="0.8"/>
+  <ellipse cx="124" cy="63" rx="12" ry="4" fill="#22d3ee" opacity="0.8"/>
+  <!-- Lambda/A on shield body -->
+  <path d="M100 96
+           L72 178
+           L84 178
+           L100 126
+           L116 178
+           L128 178Z"
+        fill="#22d3ee" opacity="0.9"/>
+  <!-- A crossbar -->
+  <path d="M82 160 L118 160" stroke="#09090b" stroke-width="5"/>
+</svg>

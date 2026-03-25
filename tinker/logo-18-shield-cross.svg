@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Shield with cross/plus pattern -->
+  <path d="M100 12 C72 12 44 20 24 30 C20 32 18 36 18 40 L26 140 C32 172 60 192 100 210 C140 192 168 172 174 140 L182 40 C182 36 180 32 176 30 C156 20 128 12 100 12Z" fill="#09090b" stroke="#22d3ee" stroke-width="2.5"/>
+  <!-- Cross -->
+  <rect x="90" y="40" width="20" height="140" rx="2" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+  <rect x="42" y="88" width="116" height="20" rx="2" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+  <!-- Center gem -->
+  <circle cx="100" cy="98" r="8" fill="#22d3ee"/>
+  <circle cx="100" cy="98" r="4" fill="#09090b"/>
+</svg>
