@@ -16,7 +16,7 @@ export default defineConfig({
     ['meta', { property: 'og:description', content: 'Rate limiting, cost tracking, caching, model routing, and safety guardrails for AI APIs. Works with OpenAI, Anthropic, Google, and 15+ providers.' }],
   ],
   themeConfig: {
-    logo: '/logo-shield.svg',
+    logo: { light: '/logo-light.svg', dark: '/logo-dark.svg' },
     siteTitle: 'AI ARMOR',
     search: {
       provider: 'local',

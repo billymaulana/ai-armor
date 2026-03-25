@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="AI ARMOR" width="300" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-light.svg">
+    <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-dark.svg" alt="AI ARMOR" width="200" />
+  </picture>
 </p>
 
 <p align="center">

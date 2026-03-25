@@ -1,74 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- ai-armor logo v9 — light background variant -->
-  <defs>
-    <linearGradient id="sf" x1="256" y1="64" x2="256" y2="482" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#F8FAFC"/>
-      <stop offset="100%" stop-color="#EDF2F7"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Shield outer -->
-  <path d="M176 66 L336 66 Q420 70 418 104 L406 316 Q370 438 256 480 Q142 438 106 316 L94 104 Q92 70 176 66 Z"
-        fill="url(#sf)" stroke="#0F172A" stroke-width="8" stroke-linejoin="round"/>
-
-  <!-- Shield inner accent -->
-  <path d="M190 80 L322 80 Q404 84 402 112 L392 310 Q360 426 256 464 Q152 426 120 310 L110 112 Q108 84 190 80 Z"
-        fill="none" stroke="rgba(15,23,42,0.08)" stroke-width="2.5"/>
-
-  <!-- Circuit traces — left -->
-  <g stroke="rgba(15,23,42,0.12)" stroke-width="1.5" fill="none">
-    <path d="M104 174 L138 174"/>
-    <path d="M100 212 L140 212 L150 202"/>
-    <path d="M96 250 L130 250"/>
-    <path d="M130 250 L130 266"/>
-    <path d="M98 284 L134 284 L142 274"/>
-    <path d="M102 316 L126 316"/>
-    <path d="M112 346 L134 346"/>
-  </g>
-  <!-- Circuit traces — right -->
-  <g stroke="rgba(15,23,42,0.12)" stroke-width="1.5" fill="none">
-    <path d="M408 174 L374 174"/>
-    <path d="M412 212 L372 212 L362 202"/>
-    <path d="M416 250 L382 250"/>
-    <path d="M382 250 L382 266"/>
-    <path d="M414 284 L378 284 L370 274"/>
-    <path d="M410 316 L386 316"/>
-    <path d="M400 346 L378 346"/>
-  </g>
-  <!-- Circuit nodes -->
-  <g fill="rgba(15,23,42,0.14)">
-    <circle cx="104" cy="174" r="3.5"/>
-    <circle cx="100" cy="212" r="3.5"/>
-    <circle cx="96" cy="250" r="3.5"/>
-    <circle cx="130" cy="266" r="2.5"/>
-    <circle cx="98" cy="284" r="3.5"/>
-    <circle cx="102" cy="316" r="3.5"/>
-    <circle cx="112" cy="346" r="3"/>
-    <circle cx="408" cy="174" r="3.5"/>
-    <circle cx="412" cy="212" r="3.5"/>
-    <circle cx="416" cy="250" r="3.5"/>
-    <circle cx="382" cy="266" r="2.5"/>
-    <circle cx="414" cy="284" r="3.5"/>
-    <circle cx="410" cy="316" r="3.5"/>
-    <circle cx="400" cy="346" r="3"/>
-  </g>
-
-  <!-- Sword -->
-  <path d="M256 12 L272 34 L256 56 L240 34 Z" fill="#0F172A"/>
-  <rect x="250" y="56" width="12" height="26" rx="2" fill="#0F172A"/>
-  <path d="M206 97 L222 88 L222 108 L206 99 Z" fill="#0F172A"/>
-  <rect x="222" y="88" width="68" height="20" rx="4" fill="#0F172A"/>
-  <path d="M306 97 L290 88 L290 108 L306 99 Z" fill="#0F172A"/>
-  <path d="M250 108 L250 458 L256 480 L262 458 L262 108 Z" fill="#0F172A"/>
-  <line x1="256" y1="128" x2="256" y2="454" stroke="#EDF2F7" stroke-width="1.5" opacity="0.3"/>
-
-  <!-- Left A -->
-  <polygon points="182,128 130,370 164,370" fill="#0F172A"/>
-  <polygon points="182,128 200,370 234,370" fill="#0F172A"/>
-  <rect x="138" y="270" width="88" height="24" rx="3" fill="#0F172A"/>
-
-  <!-- Right A -->
-  <polygon points="330,128 278,370 312,370" fill="#0F172A"/>
-  <polygon points="330,128 348,370 382,370" fill="#0F172A"/>
-  <rect x="286" y="270" width="88" height="24" rx="3" fill="#0F172A"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- AI-ARMOR Icon — dark background (no text, helmet only) -->
+  <path d="M100 14
+           C68 14 44 32 38 62
+           L36 88
+           C34 98 36 108 42 116
+           L44 120
+           L44 158
+           C44 164 48 168 54 168
+           L62 168
+           L62 148
+           L68 142
+           L68 168
+           L132 168
+           L132 142
+           L138 148
+           L138 168
+           L146 168
+           C152 168 156 164 156 158
+           L156 120
+           L158 116
+           C164 108 166 98 164 88
+           L162 62
+           C156 32 132 14 100 14Z"
+        fill="#0f172a" stroke="#22d3ee" stroke-width="2.5"/>
+  <path d="M88 14 C88 6 94 2 100 2 C106 2 112 6 112 14
+           L112 8 C112 4 108 0 100 0 C92 0 88 4 88 8Z"
+        fill="#22d3ee"/>
+  <rect x="94" y="0" width="12" height="22" rx="4" fill="#22d3ee"/>
+  <path d="M96 0 C96 -4 98 -6 100 -6 C102 -6 104 -4 104 0" fill="#22d3ee"/>
+  <path d="M48 88 L152 88" stroke="#09090b" stroke-width="14" stroke-linecap="round"/>
+  <line x1="100" y1="78" x2="100" y2="100" stroke="#09090b" stroke-width="12" stroke-linecap="round"/>
+  <ellipse cx="72" cy="88" rx="14" ry="4" fill="#22d3ee" opacity="0.85"/>
+  <ellipse cx="128" cy="88" rx="14" ry="4" fill="#22d3ee" opacity="0.85"/>
+  <line x1="82" y1="126" x2="118" y2="126" stroke="#0e7490" stroke-width="1.5"/>
+  <line x1="80" y1="132" x2="120" y2="132" stroke="#0e7490" stroke-width="1.5"/>
+  <line x1="82" y1="138" x2="118" y2="138" stroke="#0e7490" stroke-width="1.5"/>
+  <line x1="86" y1="144" x2="114" y2="144" stroke="#0e7490" stroke-width="1"/>
+  <path d="M68 168 L68 178 C68 186 82 192 100 192 C118 192 132 186 132 178 L132 168"
+        fill="#0f172a" stroke="#0e7490" stroke-width="1.5"/>
 </svg>
