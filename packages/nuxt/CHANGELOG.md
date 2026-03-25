@@ -1,5 +1,14 @@
 # @ai-armor/nuxt
 
+## 0.1.5
+
+### Patch Changes
+
+- fix(nuxt): use workspace:^ for proper version resolution on publish
+
+- Updated dependencies []:
+  - ai-armor@0.1.5
+
 ## 0.1.4
 
 ### Patch Changes
