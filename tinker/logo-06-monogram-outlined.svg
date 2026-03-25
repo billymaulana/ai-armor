@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- Shield outline only with bold AIA -->
-  <path d="M100 12 C72 12 44 20 24 30 C20 32 18 36 18 40 L26 140 C32 172 60 192 100 210 C140 192 168 172 174 140 L182 40 C182 36 180 32 176 30 C156 20 128 12 100 12Z" fill="none" stroke="#22d3ee" stroke-width="4"/>
-  <!-- Double border -->
-  <path d="M100 24 C76 24 52 30 36 38 L42 138 C48 166 70 184 100 198 C130 184 152 166 158 138 L164 38 C148 30 124 24 100 24Z" fill="none" stroke="#0e7490" stroke-width="1.5"/>
-  <!-- AIA monogram -->
-  <text x="100" y="125" text-anchor="middle" font-family="'Inter',Arial,sans-serif" font-size="56" font-weight="900" letter-spacing="-2" fill="#22d3ee">AIA</text>
-</svg>

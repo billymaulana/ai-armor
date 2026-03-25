@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="AI ARMOR" width="300" />
+  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-dark.svg" alt="AI ARMOR" width="200" />
 </p>
 
 <p align="center">
