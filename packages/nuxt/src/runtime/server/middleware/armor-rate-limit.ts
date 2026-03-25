@@ -1,3 +1,4 @@
+import { createError, defineEventHandler, getRequestHeaders, getRequestIP, setResponseHeader } from 'h3'
 import { useArmorInstance } from '../utils/armor'
 
 export default defineEventHandler(async (event) => {

@@ -1,8 +1,10 @@
+import { createError, defineEventHandler, getRequestHeader } from 'h3'
+import { useRuntimeConfig } from '#imports'
 import { useArmorInstance } from '../../utils/armor'
 
 export default defineEventHandler(async (event) => {
   // If adminSecret is configured, require it via header
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig(event)
   const expected = (config.aiArmor as Record<string, unknown>)?.adminSecret as string | undefined
 
   if (expected) {

@@ -1,5 +1,14 @@
 # @ai-armor/nuxt
 
+## 0.1.6
+
+### Patch Changes
+
+- fix(nuxt): explicit h3 imports for all server runtime files
+
+- Updated dependencies []:
+  - ai-armor@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes

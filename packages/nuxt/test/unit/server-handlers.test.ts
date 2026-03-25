@@ -2,23 +2,30 @@ import type { ArmorInstance } from 'ai-armor'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // ---------------------------------------------------------------------------
-// Nitro auto-import stubs (must be before dynamic imports)
+// Mock h3, #imports, nitropack — AND mirror to globalThis for test helpers
 // ---------------------------------------------------------------------------
-vi.stubGlobal('defineEventHandler', (fn: unknown) => fn)
-vi.stubGlobal('defineNitroPlugin', (fn: unknown) => fn)
-
 const mockRuntimeConfig = { aiArmor: {} as Record<string, unknown> }
-vi.stubGlobal('useRuntimeConfig', vi.fn(() => mockRuntimeConfig))
-vi.stubGlobal('getRequestHeader', vi.fn())
-vi.stubGlobal('getRequestHeaders', vi.fn(() => ({})))
-vi.stubGlobal('getRequestIP', vi.fn())
-vi.stubGlobal('createError', vi.fn((opts: { statusCode: number, statusMessage: string }) => {
-  const e = new Error(opts.statusMessage) as Error & { statusCode: number }
-  e.statusCode = opts.statusCode
-  return e
-}))
-vi.stubGlobal('setResponseHeader', vi.fn())
-vi.stubGlobal('readBody', vi.fn())
+
+const h3Mocks = {
+  defineEventHandler: (fn: unknown) => fn,
+  getRequestHeader: vi.fn(),
+  getRequestHeaders: vi.fn(() => ({})),
+  getRequestIP: vi.fn(),
+  createError: vi.fn((opts: { statusCode: number, statusMessage: string }) => {
+    const e = new Error(opts.statusMessage) as Error & { statusCode: number }
+    e.statusCode = opts.statusCode
+    return e
+  }),
+  setResponseHeader: vi.fn(),
+  readBody: vi.fn(),
+}
+
+vi.mock('h3', () => h3Mocks)
+vi.mock('#imports', () => ({ useRuntimeConfig: vi.fn(() => mockRuntimeConfig) }))
+vi.mock('nitropack/runtime', () => ({ defineNitroPlugin: (fn: unknown) => fn }))
+
+// Mirror h3 mocks to globalThis so existing test helpers work unchanged
+Object.assign(globalThis, h3Mocks)
 
 // ---------------------------------------------------------------------------
 // Mock armor instance
