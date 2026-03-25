@@ -1,31 +1,53 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo.png" alt="AI ARMOR" width="300" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-light.svg">
+    <img src="https://raw.githubusercontent.com/billymaulana/ai-armor/main/.github/logo-dark.svg" alt="AI ARMOR" width="160" />
+  </picture>
 </p>
 
 <h3 align="center">@ai-armor/nuxt</h3>
 
 <p align="center">
-  <strong>Nuxt module for ai-armor -- production AI toolkit with rate limiting, cost tracking, budget controls, fallback chains, caching, safety guardrails, and observability. Auto-imported composables, server middleware, and admin API routes for Nuxt 3/4.</strong>
+  Nuxt module for <a href="https://github.com/billymaulana/ai-armor">ai-armor</a> -- production AI toolkit with rate limiting, cost tracking, budget controls, fallback chains, caching, safety guardrails, and observability.
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@ai-armor/nuxt"><img src="https://img.shields.io/npm/v/@ai-armor/nuxt?color=yellow&label=npm" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@ai-armor/nuxt"><img src="https://img.shields.io/npm/v/@ai-armor/nuxt?color=22d3ee&label=npm" alt="npm version"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://nuxt.com/modules/ai-armor"><img src="https://img.shields.io/badge/Nuxt-Module-00DC82?logo=nuxt.js" alt="Nuxt Module"></a>
   <a href="https://github.com/billymaulana/ai-armor"><img src="https://img.shields.io/github/stars/billymaulana/ai-armor?style=social" alt="GitHub stars"></a>
 </p>
 
 ---
 
-## Install
+## Features
+
+- **Rate Limiting** -- Sliding window, fixed window, or token bucket per IP/user/key
+- **Cost Tracking** -- Real-time daily/monthly spend with budget alerts
+- **Safety Guardrails** -- Prompt injection detection, PII filtering, content moderation
+- **Auto-Imported Composables** -- `useArmorCost()`, `useArmorStatus()`, `useArmorSafety()`
+- **Server API Routes** -- Admin endpoints for monitoring and safety checks
+- **Zero Config** -- Works out of the box with sensible defaults
+- **TypeScript First** -- Full type safety with auto-generated types
+
+## Quick Setup
+
+Install the module:
 
 ```bash
-pnpm add @ai-armor/nuxt
+npx nuxi module add @ai-armor/nuxt
 ```
 
-## Configure
+Or manually:
+
+```bash
+pnpm add @ai-armor/nuxt ai-armor
+```
+
+Add to `nuxt.config.ts`:
 
 ```ts
-// nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@ai-armor/nuxt'],
 
@@ -41,7 +63,7 @@ export default defineNuxtConfig({
 })
 ```
 
-## Auto-Imported Composables
+## Composables
 
 | Composable | Purpose |
 |:---|:---|
@@ -49,7 +71,9 @@ export default defineNuxtConfig({
 | `useArmorStatus()` | Health check, rate limit remaining |
 | `useArmorSafety()` | Safety event tracking, block counts |
 
-## API Routes
+All composables are auto-imported -- no import statements needed.
+
+## Server API Routes
 
 | Route | Description |
 |:---|:---|
@@ -59,14 +83,34 @@ export default defineNuxtConfig({
 
 All routes protected by `adminSecret` when configured.
 
+## Server-Side Usage
+
+Access the armor instance in server routes:
+
+```ts
+// server/api/chat.post.ts
+export default defineEventHandler(async (event) => {
+  const armor = useArmor()
+  const result = await armor.invoke('openai:gpt-4o', {
+    messages: [{ role: 'user', content: 'Hello' }],
+  })
+  return result
+})
+```
+
 ## Compatibility
 
 - Nuxt 3 (>=3.0.0)
 - Nuxt 4 (>=4.0.0)
+- Node.js >= 18
 
 ## Documentation
 
-Full docs: [billymaulana.github.io/ai-armor](https://billymaulana.github.io/ai-armor/)
+Full documentation: [billymaulana.github.io/ai-armor](https://billymaulana.github.io/ai-armor/)
+
+- [Getting Started](https://billymaulana.github.io/ai-armor/guide/getting-started)
+- [Nuxt Integration Guide](https://billymaulana.github.io/ai-armor/integrations/nuxt)
+- [API Reference](https://billymaulana.github.io/ai-armor/api/create-armor)
 
 ## License
 
