@@ -47,7 +47,7 @@ const armor = createArmor({
 | Feature | Description |
 |:---|:---|
 | **Rate Limiting** | Sliding-window, per-user / per-IP / per-API-key |
-| **Cost Tracking** | 100+ model pricing, daily/monthly/per-user budgets |
+| **Cost Tracking** | 69 model pricing across 17 providers, daily/monthly/per-user budgets |
 | **Fallback Chains** | Circuit breaker + exponential backoff |
 | **Caching** | Exact-match + semantic (embedding) with LRU |
 | **Redis Adapter** | Official distributed storage adapter |

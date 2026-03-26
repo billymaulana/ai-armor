@@ -1,6 +1,6 @@
 # Cost Tracking & Budgets
 
-ai-armor includes a built-in pricing database for 70+ models across 17 providers. Track costs in real time, set budget limits, and automatically downgrade models when budgets are tight.
+ai-armor includes a built-in pricing database for 69 models across 17 providers. Track costs in real time, set budget limits, and automatically downgrade models when budgets are tight.
 
 ## How Cost Tracking Works
 
@@ -224,7 +224,7 @@ Using `store: 'redis'` as a string is not supported and will throw an error. Alw
 
 ## Supported Providers & Models
 
-The pricing database covers 70+ models across these providers:
+The pricing database covers 69 models across these providers:
 
 | Provider | Example Models | Input $/1M | Output $/1M |
 |---|---|---|---|

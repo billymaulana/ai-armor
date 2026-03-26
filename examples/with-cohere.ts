@@ -20,7 +20,7 @@ const armor = createArmor({
       'command-r': 'command-light',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       fast: 'command-light',

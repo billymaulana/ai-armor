@@ -50,7 +50,7 @@ One configuration object. All guardrails active. Works with any AI provider, any
 |---|---|---|---|
 | Language | TypeScript-native | Your language | Python |
 | Rate limiting | Sliding window | Must implement | Basic |
-| Cost tracking | 70+ models, auto pricing | Manual pricing table | Yes |
+| Cost tracking | 69 models, auto pricing | Manual pricing table | Yes |
 | Budget controls | Daily/monthly/per-user + auto downgrade | Must implement | Basic |
 | Response caching | O(1) LRU with TTL | Must implement | Redis required |
 | Safety guardrails | Prompt injection, PII, token limits | Must implement | No |

@@ -66,7 +66,7 @@ const armor = createArmor({
     onExceeded: 'block',
     store, // Cost data shared across instances
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   logging: { enabled: true, include: ['model', 'tokens', 'cost', 'latency', 'userId'] },
 })
 

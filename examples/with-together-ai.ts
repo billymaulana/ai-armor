@@ -23,7 +23,7 @@ const armor = createArmor({
       'Qwen/Qwen2.5-72B-Instruct-Turbo': 'meta-llama/Llama-4-Scout-17B-16E-Instruct',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       llama70b: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',

@@ -22,7 +22,7 @@ const armor = createArmor({
       'glm-5': 'glm-4.7',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       fast: 'glm-4.7',

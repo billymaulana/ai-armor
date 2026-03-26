@@ -26,7 +26,7 @@ const armor = createArmor({
       'gpt-4o-azure': 'gpt-4o-mini-azure',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       fast: 'gpt-4o-mini-azure',
