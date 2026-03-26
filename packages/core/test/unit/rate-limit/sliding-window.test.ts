@@ -193,6 +193,25 @@ describe('createSlidingWindowLimiter', () => {
     expect(result.resetAt).toBeGreaterThan(Date.now())
   })
 
+  it('should return accurate resetAt on allowed path', async () => {
+    vi.useFakeTimers()
+    const baseTime = Date.now()
+
+    const limiter = createSlidingWindowLimiter({
+      strategy: 'sliding-window',
+      rules: [{ key: 'user', limit: 5, window: '1m' }],
+    })
+
+    const ctx = { userId: 'user-1' }
+    const result = await limiter.check(ctx)
+
+    // resetAt should be baseTime + 60s (when the first entry expires), not now + 60s
+    expect(result.allowed).toBe(true)
+    expect(result.resetAt).toBe(baseTime + 60_000)
+
+    vi.useRealTimers()
+  })
+
   it('should throw when store is "redis" without adapter', () => {
     expect(() => createSlidingWindowLimiter({
       strategy: 'sliding-window',

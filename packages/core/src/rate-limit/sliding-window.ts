@@ -103,7 +103,8 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
       const remaining = snapshot.limit - snapshot.entries.length
       if (remaining < minRemaining) {
         minRemaining = remaining
-        earliestReset = now + snapshot.windowMs
+        // Reset time = when the oldest entry in this window expires
+        earliestReset = snapshot.entries[0]!.timestamp + snapshot.windowMs
       }
     }
 

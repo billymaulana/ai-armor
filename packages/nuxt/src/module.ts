@@ -7,7 +7,7 @@ import type {
   RoutingConfig,
   SafetyConfig,
 } from 'ai-armor'
-import { addImports, addServerHandler, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addImports, addServerHandler, addServerImports, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { toSerializable } from './utils/serializable'
 
 declare module '@nuxt/schema' {
@@ -51,6 +51,12 @@ export default defineNuxtModule<ModuleOptions>({
       { name: 'useArmorCost', from: resolve('./runtime/composables/useArmorCost') },
       { name: 'useArmorStatus', from: resolve('./runtime/composables/useArmorStatus') },
       { name: 'useArmorSafety', from: resolve('./runtime/composables/useArmorSafety') },
+    ])
+
+    // Server utilities auto-import (initArmor, useArmorInstance available via #imports in server context)
+    addServerImports([
+      { name: 'initArmor', from: resolve('./runtime/server/utils/armor') },
+      { name: 'useArmorInstance', from: resolve('./runtime/server/utils/armor') },
     ])
 
     // Server plugin to initialize armor instance
