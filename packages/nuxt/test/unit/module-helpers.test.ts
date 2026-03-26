@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { findNonSerializableKeys, toSerializable } from '../../src/module'
+import { findNonSerializableKeys, toSerializable } from '../../src/utils/serializable'
 
 describe('findNonSerializableKeys', () => {
   it('should return empty for plain object', () => {

@@ -38,7 +38,7 @@ const request = {
 }
 
 // Check cache before calling the API
-const cached = armor.getCachedResponse(request)
+const cached = await armor.getCachedResponse(request)
 if (cached) {
   return cached // Instant response, no API call
 }
@@ -47,7 +47,7 @@ if (cached) {
 const response = await callAI(request)
 
 // Store in cache for future identical requests
-armor.setCachedResponse(request, response)
+await armor.setCachedResponse(request, response)
 ```
 
 ## TTL Configuration
@@ -194,7 +194,7 @@ async function chat(model: string, message: string) {
   const request = { model, messages: [{ role: 'user', content: message }] }
 
   // Check cache first
-  const cached = armor.getCachedResponse(request)
+  const cached = await armor.getCachedResponse(request)
   if (cached) {
     // eslint-disable-next-line no-console
     console.log('Cache hit! No API call needed.')
@@ -207,7 +207,7 @@ async function chat(model: string, message: string) {
   const latency = Date.now() - start
 
   // Cache the response
-  armor.setCachedResponse(request, response)
+  await armor.setCachedResponse(request, response)
 
   // eslint-disable-next-line no-console
   console.log(`API call: ${latency}ms, cached for future use`)

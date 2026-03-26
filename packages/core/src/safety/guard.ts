@@ -2,6 +2,8 @@ import type { ArmorContext, ArmorRequest, SafetyCheckResult, SafetyConfig } from
 import { encode } from 'gpt-tokenizer'
 import { checkInjection, checkPII } from './patterns'
 
+const MAX_TEXT_LENGTH = 100_000
+
 interface MessageContent {
   type?: string
   text?: string
@@ -56,9 +58,12 @@ export function createSafetyGuard(config: SafetyConfig) {
       const messages = request.messages ?? []
       const fullText = extractText(messages)
 
+      // Cap text length to prevent DoS via tokenization of extremely large inputs
+      const cappedText = fullText.length > MAX_TEXT_LENGTH ? fullText.slice(0, MAX_TEXT_LENGTH) : fullText
+
       // Check max tokens per request
       if (config.maxTokensPerRequest != null) {
-        const tokens = encode(fullText)
+        const tokens = encode(cappedText)
         if (tokens.length > config.maxTokensPerRequest) {
           details.push(
             `Token count ${tokens.length} exceeds limit ${config.maxTokensPerRequest}`,
@@ -68,7 +73,7 @@ export function createSafetyGuard(config: SafetyConfig) {
 
       // Check prompt injection
       if (config.promptInjection) {
-        const result = checkInjection(fullText)
+        const result = checkInjection(cappedText)
         if (result.detected) {
           details.push(`Prompt injection detected: ${result.pattern}`)
         }
@@ -76,7 +81,7 @@ export function createSafetyGuard(config: SafetyConfig) {
 
       // Check PII
       if (config.piiDetection) {
-        const result = checkPII(fullText)
+        const result = checkPII(cappedText)
         if (result.detected) {
           details.push(`PII detected: ${result.types.join(', ')}`)
         }
@@ -87,7 +92,7 @@ export function createSafetyGuard(config: SafetyConfig) {
         for (const pattern of config.blockedPatterns) {
           // Reset lastIndex to avoid non-deterministic behavior with stateful RegExp (g/y flags)
           pattern.lastIndex = 0
-          if (pattern.test(fullText)) {
+          if (pattern.test(cappedText)) {
             details.push(`Blocked pattern matched: ${pattern.source}`)
           }
         }

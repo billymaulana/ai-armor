@@ -168,36 +168,16 @@ The callback fires synchronously when a rate limit check fails. Use it for loggi
 By default, rate limit state is stored in-memory (per-process). For multi-instance deployments, pass a `StorageAdapter` to share state across all server instances:
 
 ```ts
-import type { StorageAdapter } from 'ai-armor'
+import { createArmor, createRedisAdapter } from 'ai-armor'
 import Redis from 'ioredis'
 
-function createRedisAdapter(redis: Redis): StorageAdapter {
-  return {
-    async getItem(key: string) {
-      const data = await redis.get(`ai-armor:${key}`)
-      if (!data)
-        return null
-      return JSON.parse(data)
-    },
-    async setItem(key: string, value: unknown) {
-      await redis.set(`ai-armor:${key}`, JSON.stringify(value), 'EX', 86400)
-    },
-    async removeItem(key: string) {
-      await redis.del(`ai-armor:${key}`)
-    },
-  }
-}
-
-const redis = new Redis(process.env.REDIS_URL ?? 'redis://localhost:6379')
+const redis = new Redis()
 
 const armor = createArmor({
   rateLimit: {
     strategy: 'sliding-window',
-    rules: [
-      { key: 'user', limit: 60, window: '1m' },
-      { key: 'ip', limit: 200, window: '1m' },
-    ],
-    store: createRedisAdapter(redis), // Shared across all instances
+    rules: [{ key: 'user', limit: 100, window: '1m' }],
+    store: createRedisAdapter(redis),
   },
 })
 ```

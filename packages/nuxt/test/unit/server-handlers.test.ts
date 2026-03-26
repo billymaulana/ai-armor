@@ -52,8 +52,10 @@ const mockArmor: ArmorInstance = {
   executeFallback: vi.fn(),
 }
 
+const mockUseArmorInstance = vi.fn(() => mockArmor)
+
 vi.mock('../../src/runtime/server/utils/armor', () => ({
-  useArmorInstance: () => mockArmor,
+  useArmorInstance: (...args: unknown[]) => mockUseArmorInstance(...args),
   initArmor: vi.fn(),
   _resetArmor: vi.fn(),
 }))
@@ -61,8 +63,8 @@ vi.mock('../../src/runtime/server/utils/armor', () => ({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function createMockEvent(headers: Record<string, string> = {}) {
-  return { _headers: headers }
+function createMockEvent(headers: Record<string, string> = {}, path = '/api/test') {
+  return { _headers: headers, path }
 }
 
 function setupHeaderMock(headers: Record<string, string> = {}) {
@@ -121,6 +123,20 @@ describe('status endpoint', () => {
     const result = await handler(createMockEvent())
 
     expect(result.healthy).toBe(true)
+  })
+
+  it('should return healthy: false when armor instance is not initialized', async () => {
+    setupHeaderMock()
+    mockUseArmorInstance.mockImplementationOnce(() => {
+      throw new Error('[ai-armor] Armor instance not initialized')
+    })
+
+    const handler = (await import('../../src/runtime/server/api/_armor/status.get')).default
+    const result = await handler(createMockEvent())
+
+    expect(result.healthy).toBe(false)
+    expect(result.error).toBeDefined()
+    expect(result.rateLimitRemaining).toBe(0)
   })
 })
 
@@ -239,6 +255,23 @@ describe('safety endpoint', () => {
     expect(result.allowed).toBe(true)
   })
 
+  it('should reject text exceeding 8192 characters with 413', async () => {
+    setupHeaderMock()
+    const rb = globalThis.readBody as ReturnType<typeof vi.fn>
+    rb.mockResolvedValue({ text: 'a'.repeat(9000) })
+
+    const handler = (await import('../../src/runtime/server/api/_armor/safety.post')).default
+
+    try {
+      await handler(createMockEvent())
+      expect.fail('Should have thrown')
+    }
+    catch (e: unknown) {
+      const err = e as Error & { statusCode?: number }
+      expect(err.statusCode).toBe(413)
+    }
+  })
+
   it('should return blocked result for injection', async () => {
     setupHeaderMock()
     const rb = globalThis.readBody as ReturnType<typeof vi.fn>
@@ -299,6 +332,15 @@ describe('rate-limit middleware', () => {
       'Retry-After',
       expect.any(String),
     )
+  })
+
+  it('should skip rate limiting for _armor API routes', async () => {
+    const handler = (await import('../../src/runtime/server/middleware/armor-rate-limit')).default
+    const event = { ...createMockEvent(), path: '/api/_armor/status' }
+    const result = await handler(event)
+
+    expect(result).toBeUndefined()
+    expect(mockUseArmorInstance).not.toHaveBeenCalled()
   })
 
   it('should extract context from headers', async () => {

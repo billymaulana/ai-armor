@@ -171,7 +171,7 @@ const { text } = await generateText({ model, prompt: 'Hello' })
 
 ## With HTTP Middleware
 
-The [HTTP middleware](/integrations/ai-sdk) resolves the `model` field in the request body:
+The HTTP middleware (`createArmorHandler`) resolves the `model` field in the request body:
 
 ```ts
 import { createArmorHandler } from 'ai-armor/http'

@@ -17,7 +17,7 @@
     "playground:nuxt": "pnpm --filter playground-nuxt run dev",
     "changeset": "changeset",
     "version": "changeset version",
-    "release": "pnpm build && changeset publish",
+    "release": "changeset publish",
     "quality": "pnpm lint && pnpm typecheck && vitest run"
   },
   "devDependencies": {

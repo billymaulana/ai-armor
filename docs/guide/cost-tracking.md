@@ -203,30 +203,17 @@ const armor = createArmor({
 By default, cost data is stored in-memory (lost on restart). For production use, pass a `StorageAdapter`:
 
 ```ts
-import type { StorageAdapter } from 'ai-armor'
+import { createArmor, createRedisAdapter } from 'ai-armor'
 import Redis from 'ioredis'
 
-const redis = new Redis(process.env.REDIS_URL!)
-
-const redisStore: StorageAdapter = {
-  async getItem(key) {
-    const data = await redis.get(`ai-armor:${key}`)
-    return data ? JSON.parse(data) : null
-  },
-  async setItem(key, value) {
-    await redis.set(`ai-armor:${key}`, JSON.stringify(value), 'EX', 86400 * 33)
-  },
-  async removeItem(key) {
-    await redis.del(`ai-armor:${key}`)
-  },
-}
+const redis = new Redis()
 
 const armor = createArmor({
   budget: {
     daily: 200,
     monthly: 2000,
     onExceeded: 'block',
-    store: redisStore, // Cost data persists across restarts
+    store: createRedisAdapter(redis), // Cost data persists across restarts
   },
 })
 ```

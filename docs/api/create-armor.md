@@ -544,10 +544,14 @@ The `ai-armor` package also exports these pricing utilities:
 import {
   addModel,
   calculateCost,
+  cosineSimilarity,
   createPricingRegistry,
+  createRedisAdapter,
+  createSemanticCache,
   getAllModels,
   getModelPricing,
   getProvider,
+  pricingDatabase,
   registerModels,
   removeModel,
   resetPricing,
@@ -555,18 +559,30 @@ import {
 } from 'ai-armor'
 ```
 
-| Function | Signature | Description |
-|---|---|---|
-| `calculateCost` | `(model, inputTokens, outputTokens) => number` | Calculate cost in USD |
-| `getModelPricing` | `(model) => ModelPricing \| undefined` | Get pricing info for a model |
-| `getAllModels` | `() => string[]` | List all models in the pricing database |
-| `getProvider` | `(model) => string` | Get the provider name for a model |
-| `addModel` | `(pricing: ModelPricing) => void` | Add a custom model to the pricing registry |
-| `updateModel` | `(model, updates) => void` | Update pricing for an existing model |
-| `removeModel` | `(model) => void` | Remove a model from the registry |
-| `resetPricing` | `() => void` | Reset all custom models, restore defaults |
-| `registerModels` | `(models: ModelPricing[]) => void` | Bulk add multiple models |
-| `createPricingRegistry` | `(initialModels?) => PricingRegistry` | Create an isolated pricing instance |
+| Function | Description |
+|----------|-------------|
+| `calculateCost(model, inputTokens, outputTokens)` | Calculate cost in USD |
+| `getModelPricing(model)` | Get pricing info for a model |
+| `getAllModels()` | List all models in the pricing database |
+| `getProvider(model)` | Get the provider name for a model |
+| `addModel(pricing)` | Add a custom model to the pricing registry |
+| `updateModel(model, updates)` | Update pricing for an existing model |
+| `removeModel(model)` | Remove a model from the registry |
+| `resetPricing()` | Reset all custom models, restore defaults |
+| `registerModels(models)` | Bulk add multiple models |
+| `createPricingRegistry(initialModels?)` | Create an isolated pricing instance |
+| `createRedisAdapter(client, options?)` | Built-in Redis storage adapter for rate limiting and cost tracking |
+| `createSemanticCache(config)` | Create a standalone semantic cache instance |
+| `cosineSimilarity(a, b)` | Compute cosine similarity between two vectors |
+| `pricingDatabase` | Built-in model pricing dataset (`ModelPricing[]`) |
+
+### Type Exports
+
+| Type | Description |
+|------|-------------|
+| `RedisAdapterOptions` | Options for `createRedisAdapter` (prefix, ttl) |
+| `RedisLike` | Interface for Redis client compatibility |
+| `PricingRegistry` | Pricing registry type |
 
 ## Related
 

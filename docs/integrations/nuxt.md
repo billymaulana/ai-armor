@@ -107,11 +107,11 @@ const { todayCost, monthCost, budget, isNearLimit, costHistory, refresh, pending
 
 | Ref | Type | Description |
 |---|---|---|
-| `todayCost` | `Ref<number>` | Current daily spend in USD |
-| `monthCost` | `Ref<number>` | Current monthly spend in USD |
-| `budget` | `Ref<{ daily: number, monthly: number }>` | Configured budget limits |
-| `isNearLimit` | `Ref<boolean>` | Whether spend is approaching the limit |
-| `costHistory` | `Ref<Array<{ date: string, cost: number }>>` | Historical cost data |
+| `todayCost` | `ComputedRef<number>` | Current daily spend in USD |
+| `monthCost` | `ComputedRef<number>` | Current monthly spend in USD |
+| `budget` | `ComputedRef<{ daily: number, monthly: number }>` | Configured budget limits |
+| `isNearLimit` | `ComputedRef<boolean>` | Whether spend is approaching the limit |
+| `costHistory` | `ComputedRef<Array<{ date: string, cost: number }>>` | Historical cost data |
 | `refresh` | `() => Promise<void>` | Re-fetch cost data from the server |
 | `pending` | `Ref<boolean>` | Whether a fetch is in progress |
 | `error` | `Ref<Error \| null>` | Error from the last fetch attempt |
@@ -144,9 +144,9 @@ const { isHealthy, rateLimitRemaining, rateLimitResetAt, refresh, pending, error
 
 | Ref | Type | Description |
 |---|---|---|
-| `isHealthy` | `Ref<boolean>` | Whether the provider is responding normally |
-| `rateLimitRemaining` | `Ref<number>` | Remaining requests before rate limit |
-| `rateLimitResetAt` | `Ref<string \| null>` | ISO timestamp when the rate limit resets |
+| `isHealthy` | `ComputedRef<boolean>` | Whether the provider is responding normally |
+| `rateLimitRemaining` | `ComputedRef<number>` | Remaining requests before rate limit |
+| `rateLimitResetAt` | `ComputedRef<string \| null>` | ISO timestamp when the rate limit resets |
 | `refresh` | `() => Promise<void>` | Re-fetch status data from the server |
 | `pending` | `Ref<boolean>` | Whether a fetch is in progress |
 | `error` | `Ref<Error \| null>` | Error from the last fetch attempt |
@@ -209,9 +209,9 @@ async function handleSubmit() {
 |---|---|---|
 | `checkText` | `(text: string, model?: string) => Promise<void>` | Run a safety check on the given text |
 | `lastCheck` | `ShallowRef<ArmorSafetyResponse \| null>` | Full response from the last safety check |
-| `isBlocked` | `Ref<boolean>` | Whether the last checked text was blocked |
-| `reason` | `Ref<string \| null>` | Human-readable reason for the block |
-| `details` | `Ref<string[]>` | Detailed list of matched safety rules |
+| `isBlocked` | `ComputedRef<boolean>` | Whether the last checked text was blocked |
+| `reason` | `ComputedRef<string \| null>` | Human-readable reason for the block |
+| `details` | `ComputedRef<string[]>` | Detailed list of matched safety rules |
 | `blockCount` | `Ref<number>` | Running count of blocked requests in this session |
 | `reset` | `() => void` | Clear all safety state (lastCheck, isBlocked, etc.) |
 | `pending` | `Ref<boolean>` | Whether a safety check is in progress |
@@ -369,6 +369,72 @@ const monthlyUsagePercent = computed(() => {
   </div>
 </template>
 ```
+
+## Advanced: Server Plugin Configuration
+
+When your configuration requires non-serializable values (callbacks, `RegExp`, `StorageAdapter`), the module cannot pass them through `runtimeConfig`. Instead, create a server plugin:
+
+```ts
+// server/plugins/armor.ts
+import { initArmor } from '#imports'
+import { createArmor, createRedisAdapter } from 'ai-armor'
+import Redis from 'ioredis'
+
+export default defineNitroPlugin(() => {
+  const redis = new Redis()
+
+  const armor = createArmor({
+    rateLimit: {
+      strategy: 'sliding-window',
+      rules: [{ key: 'user', limit: 100, window: '1m' }],
+      store: createRedisAdapter(redis),
+      onLimited: (ctx) => {
+        console.warn(`Rate limited: ${ctx.userId}`)
+      },
+    },
+    safety: {
+      promptInjection: true,
+      blockedPatterns: [/confidential/gi],
+    },
+  })
+
+  initArmor(armor)
+})
+```
+
+The `initArmor()` function replaces the default auto-initialized instance. Your server plugin runs before any route handler, so the custom instance is available everywhere via `useArmorInstance()`.
+
+::: tip
+When using a server plugin, you can set `aiArmor: {}` in `nuxt.config.ts` to skip the auto-initialization warning. The module will still register the composables and API routes.
+:::
+
+## Built-in API Routes
+
+The module registers three server API routes:
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/_armor/usage` | GET | Returns cost data (today, month, budget, history) |
+| `/api/_armor/status` | GET | Returns health status and rate limit info |
+| `/api/_armor/safety` | POST | Checks text for safety violations |
+
+All routes support optional authentication via `adminSecret`:
+
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  aiArmor: {
+    adminSecret: process.env.AI_ARMOR_ADMIN_SECRET,
+    // ... other config
+  },
+})
+```
+
+When `adminSecret` is set, requests must include the `x-armor-admin-secret` header. Without it, endpoints are publicly accessible.
+
+::: warning
+In production, always set `adminSecret` to protect these endpoints from unauthorized access.
+:::
 
 ## Module Compatibility
 

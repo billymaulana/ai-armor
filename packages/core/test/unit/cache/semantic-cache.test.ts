@@ -188,4 +188,42 @@ describe('createSemanticCache', () => {
     await cache.set(req, { content: 'cached' })
     expect(await cache.has(req)).toBe(true)
   })
+
+  it('should gracefully return undefined when embeddingFn throws on get', async () => {
+    let callCount = 0
+    const failingEmbeddingFn = async (text: string): Promise<number[]> => {
+      callCount++
+      if (callCount > 1) {
+        throw new Error('Embedding API down')
+      }
+      return mockEmbeddingFn(text)
+    }
+
+    const cache = createSemanticCache({
+      enabled: true,
+      strategy: 'semantic',
+      ttl: 3600,
+      embeddingFn: failingEmbeddingFn,
+    })
+
+    // First call (set) succeeds
+    await cache.set(makeRequest('gpt-4o', 'hello'), { content: 'cached' })
+
+    // Second call (get) fails — should return undefined, not throw
+    const result = await cache.get(makeRequest('gpt-4o', 'hello'))
+    expect(result).toBeUndefined()
+  })
+
+  it('should gracefully skip set when embeddingFn throws', async () => {
+    const cache = createSemanticCache({
+      enabled: true,
+      strategy: 'semantic',
+      ttl: 3600,
+      embeddingFn: async () => { throw new Error('Embedding API down') },
+    })
+
+    // Should not throw
+    await cache.set(makeRequest('gpt-4o', 'hello'), { content: 'data' })
+    expect(cache.size()).toBe(0)
+  })
 })

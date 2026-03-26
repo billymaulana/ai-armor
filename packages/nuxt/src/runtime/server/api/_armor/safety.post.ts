@@ -17,7 +17,11 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const armor = useArmorInstance()
 
+  const MAX_SAFETY_INPUT_LENGTH = 8192
   const text = typeof body?.text === 'string' ? body.text : ''
+  if (text.length > MAX_SAFETY_INPUT_LENGTH) {
+    throw createError({ statusCode: 413, statusMessage: 'Request text too large' })
+  }
   const model = typeof body?.model === 'string' ? body.model : 'unknown'
 
   const request = {

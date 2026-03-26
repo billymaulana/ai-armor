@@ -44,7 +44,13 @@ export function createSemanticCache(config: SemanticCacheConfig) {
     evictExpired()
 
     const text = extractText(request)
-    const queryEmbedding = await config.embeddingFn(text)
+    let queryEmbedding: number[]
+    try {
+      queryEmbedding = await config.embeddingFn(text)
+    }
+    catch {
+      return undefined
+    }
 
     let bestMatch: SemanticCacheEntry | undefined
     let bestSimilarity = -1
@@ -75,7 +81,13 @@ export function createSemanticCache(config: SemanticCacheConfig) {
       return
 
     const text = extractText(request)
-    const embedding = await config.embeddingFn(text)
+    let embedding: number[]
+    try {
+      embedding = await config.embeddingFn(text)
+    }
+    catch {
+      return
+    }
 
     entries.push({
       text,
