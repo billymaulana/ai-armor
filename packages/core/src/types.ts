@@ -141,7 +141,7 @@ export interface ArmorInstance {
   checkRateLimit: (ctx: ArmorContext) => Promise<RateLimitResult>
   peekRateLimit: (ctx: ArmorContext) => Promise<{ remaining: number, resetAt: number }>
   trackCost: (model: string, inputTokens: number, outputTokens: number, userId?: string) => Promise<void>
-  checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: string, suggestedModel?: string | undefined }>
+  checkBudget: (model: string, ctx: ArmorContext) => Promise<{ allowed: boolean, action: 'block' | 'warn' | 'downgrade-model' | 'pass', suggestedModel?: string | undefined }>
   getDailyCost: (userId?: string) => Promise<number>
   getMonthlyCost: (userId?: string) => Promise<number>
   resolveModel: (model: string) => string

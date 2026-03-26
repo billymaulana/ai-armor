@@ -10,13 +10,17 @@ import { join } from 'node:path'
 import process from 'node:process'
 
 const dist = join(import.meta.dirname, '..', 'dist')
-const entries = ['index', 'ai-sdk', 'http']
+const entries = ['index', 'ai-sdk', 'http', 'redis']
 
 const files = readdirSync(dist)
 
 for (const entry of entries) {
+  // Match entry-HASH pattern exactly (hash is alphanumeric, excludes entry-submodule-HASH)
+  const dtsPattern = new RegExp(`^${entry}-[A-Za-z0-9_]+\\.d\\.ts$`)
+  const dctsPattern = new RegExp(`^${entry}-[A-Za-z0-9_]+\\.d\\.cts$`)
+
   // ESM declaration: entry-HASH.d.ts -> entry.d.ts
-  const dtsMatches = files.filter(f => f.startsWith(`${entry}-`) && f.endsWith('.d.ts') && !f.endsWith('.d.cts'))
+  const dtsMatches = files.filter(f => dtsPattern.test(f))
   if (dtsMatches.length > 1) {
     process.stderr.write(`[fix-dts] Ambiguous: multiple .d.ts matches for ${entry}: ${dtsMatches.join(', ')}\n`)
     process.exit(1)
@@ -27,7 +31,7 @@ for (const entry of entries) {
   }
 
   // CJS declaration: entry-HASH.d.cts -> entry.d.cts
-  const dctsMatches = files.filter(f => f.startsWith(`${entry}-`) && f.endsWith('.d.cts'))
+  const dctsMatches = files.filter(f => dctsPattern.test(f))
   if (dctsMatches.length > 1) {
     process.stderr.write(`[fix-dts] Ambiguous: multiple .d.cts matches for ${entry}: ${dctsMatches.join(', ')}\n`)
     process.exit(1)

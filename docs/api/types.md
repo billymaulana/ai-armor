@@ -232,7 +232,7 @@ interface SemanticCacheConfig {
 | `ttl` | `number` | Yes | Time-to-live for cache entries, in seconds. |
 | `maxSize` | `number` | No | Maximum number of cache entries. When exceeded, LRU entries are evicted. |
 | `embeddingFn` | `(text: string) => Promise<number[]>` | Yes | Function that returns an embedding vector for the given text. Used for similarity comparison. |
-| `similarityThreshold` | `number` | No | Minimum cosine similarity (0-1) to consider a cache hit. Default: `0.95`. |
+| `similarityThreshold` | `number` | No | Minimum cosine similarity (0-1) to consider a cache hit. Default: `0.92`. |
 | `keyFn` | `(request: ArmorRequest) => string` | No | Custom function to generate cache keys. Default serializes model + messages + temperature + tools. |
 
 ---
@@ -481,23 +481,18 @@ interface StorageAdapter {
 **Example implementation (Redis):**
 
 ```ts
-import type { StorageAdapter } from 'ai-armor'
+import { createArmor, createRedisAdapter } from 'ai-armor'
 import Redis from 'ioredis'
 
-function createRedisAdapter(redis: Redis): StorageAdapter {
-  return {
-    async getItem(key) {
-      const data = await redis.get(`ai-armor:${key}`)
-      return data ? JSON.parse(data) : null
-    },
-    async setItem(key, value) {
-      await redis.set(`ai-armor:${key}`, JSON.stringify(value), 'EX', 86400)
-    },
-    async removeItem(key) {
-      await redis.del(`ai-armor:${key}`)
-    },
-  }
-}
+const redis = new Redis()
+
+const armor = createArmor({
+  rateLimit: {
+    strategy: 'sliding-window',
+    rules: [{ key: 'user', limit: 100, window: '1m' }],
+    store: createRedisAdapter(redis, { prefix: 'armor:', ttl: 86400 }),
+  },
+})
 ```
 
 ---

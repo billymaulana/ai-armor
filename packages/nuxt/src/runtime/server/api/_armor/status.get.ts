@@ -1,3 +1,4 @@
+import type { ArmorInstance } from 'ai-armor'
 import { useRuntimeConfig } from '#imports'
 import { createError, defineEventHandler, getRequestHeader, getRequestIP } from 'h3'
 import { useArmorInstance } from '../../utils/armor'
@@ -14,7 +15,20 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const armor = useArmorInstance()
+  let armor: ArmorInstance
+
+  try {
+    armor = useArmorInstance()
+  }
+  catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err)
+    return {
+      healthy: false,
+      error: errorMessage,
+      rateLimitRemaining: 0,
+      rateLimitResetAt: null,
+    }
+  }
 
   // Use getRequestIP for safer IP extraction (respects proxy config)
   const ip = getRequestIP(event) ?? getRequestHeader(event, 'x-forwarded-for')?.split(',')[0]?.trim()

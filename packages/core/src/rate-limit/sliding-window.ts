@@ -1,4 +1,5 @@
 import type { ArmorContext, RateLimitConfig, StorageAdapter } from '../types'
+import { parseWindow, resolveKey } from './window-utils'
 
 interface WindowEntry {
   timestamp: number
@@ -8,52 +9,11 @@ interface RateLimitStore {
   entries: Map<string, WindowEntry[]>
 }
 
-function parseWindow(window: string): number {
-  const match = window.match(/^(\d+)([smhd])$/)
-  if (!match) {
-    throw new Error(`Invalid window format: "${window}". Use format like "1m", "1h", "1d"`)
-  }
-
-  const value = Number.parseInt(match[1]!, 10)
-  if (value === 0) {
-    throw new Error(`Invalid window format: "${window}". Window must be greater than 0`)
-  }
-  const unit = match[2]!
-
-  const multipliers: Record<string, number> = {
-    s: 1000,
-    m: 60 * 1000,
-    h: 60 * 60 * 1000,
-    d: 24 * 60 * 60 * 1000,
-  }
-
-  return value * multipliers[unit]!
-}
-
-function resolveKey(config: RateLimitConfig, ctx: ArmorContext, ruleKey: string): string {
-  if (config.keyResolver) {
-    return config.keyResolver(ctx, ruleKey)
-  }
-
-  switch (ruleKey) {
-    case 'user':
-      return ctx.userId ?? 'anonymous'
-    case 'ip':
-      return ctx.ip ?? 'unknown'
-    case 'apiKey':
-      return ctx.apiKey ?? 'unknown'
-    default:
-      if (Object.prototype.hasOwnProperty.call(ctx, ruleKey)) {
-        return (ctx[ruleKey] as string) ?? 'unknown'
-      }
-      return 'unknown'
-  }
-}
-
 export function createSlidingWindowLimiter(config: RateLimitConfig) {
-  // Validate all rules eagerly at construction time (fail-fast)
-  for (const rule of config.rules) {
-    parseWindow(rule.window)
+  // Validate all rules eagerly at construction time (fail-fast) and precompute window ms
+  const precomputedWindows = new Map<number, number>()
+  for (let i = 0; i < config.rules.length; i++) {
+    precomputedWindows.set(i, parseWindow(config.rules[i]!.window))
   }
 
   const store: RateLimitStore = { entries: new Map() }
@@ -100,10 +60,11 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
       limit: number
     }> = []
 
-    for (const rule of config.rules) {
+    for (let i = 0; i < config.rules.length; i++) {
+      const rule = config.rules[i]!
+      const windowMs = precomputedWindows.get(i)!
       const resolvedKey = resolveKey(config, ctx, rule.key)
       const storeKey = getStoreKey(rule.key, resolvedKey)
-      const windowMs = parseWindow(rule.window)
       const windowStart = now - windowMs
 
       let entries = await getEntries(storeKey)
@@ -113,8 +74,7 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
 
       // Check if this rule blocks
       if (entries.length >= rule.limit) {
-        const oldestInWindow = entries[0]!.timestamp
-        const resetAt = oldestInWindow + windowMs
+        const resetAt = entries[0]!.timestamp + windowMs
 
         // Persist pruned entries BEFORE firing callback (so external stores are consistent)
         await setEntries(storeKey, entries)
@@ -123,11 +83,7 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
           config.onLimited(ctx)
         }
 
-        return {
-          allowed: false,
-          remaining: 0,
-          resetAt,
-        }
+        return { allowed: false, remaining: 0, resetAt }
       }
 
       ruleSnapshots.push({ storeKey, entries, windowMs, limit: rule.limit })
@@ -147,7 +103,8 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
       const remaining = snapshot.limit - snapshot.entries.length
       if (remaining < minRemaining) {
         minRemaining = remaining
-        earliestReset = now + snapshot.windowMs
+        // Reset time = when the oldest entry in this window expires
+        earliestReset = snapshot.entries[0]!.timestamp + snapshot.windowMs
       }
     }
 
@@ -163,10 +120,11 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
     let minRemaining = Number.POSITIVE_INFINITY
     let earliestReset = 0
 
-    for (const rule of config.rules) {
+    for (let i = 0; i < config.rules.length; i++) {
+      const rule = config.rules[i]!
+      const windowMs = precomputedWindows.get(i)!
       const resolvedKey = resolveKey(config, ctx, rule.key)
       const storeKey = getStoreKey(rule.key, resolvedKey)
-      const windowMs = parseWindow(rule.window)
       const windowStart = now - windowMs
 
       const entries = (await getEntries(storeKey)).filter(e => e.timestamp > windowStart)
@@ -193,11 +151,7 @@ export function createSlidingWindowLimiter(config: RateLimitConfig) {
     // use the adapter's native clear mechanism.
   }
 
-  return {
-    check,
-    peek,
-    reset,
-  }
+  return { check, peek, reset }
 }
 
 export { parseWindow }

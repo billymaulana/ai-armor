@@ -91,7 +91,7 @@ export function createArmor(config: ArmorConfig): ArmorInstance {
         return { allowed: true as const, action: 'pass' as const }
       }
       const result = await costTracker.checkBudget(model, ctx)
-      const out: { allowed: boolean, action: string, suggestedModel?: string | undefined } = {
+      const out: { allowed: boolean, action: 'block' | 'warn' | 'downgrade-model' | 'pass', suggestedModel?: string | undefined } = {
         allowed: result.allowed,
         action: result.action,
       }

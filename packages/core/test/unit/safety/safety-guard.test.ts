@@ -651,4 +651,19 @@ describe('createSafetyGuard', () => {
     expect(result.allowed).toBe(true)
     expect(result.details).toEqual([])
   })
+
+  it('should cap text length to prevent DoS on extremely large input', () => {
+    const guard = createSafetyGuard({ blockedPatterns: [/MARKER_AT_END/] })
+    // Create a message with text exceeding MAX_TEXT_LENGTH (100,000)
+    // Place a marker beyond the cap — it should not be detected
+    const hugeContent = `${'a'.repeat(100_001)}MARKER_AT_END`
+    const req = {
+      model: 'gpt-4',
+      messages: [{ role: 'user', content: hugeContent }],
+    }
+    const result = guard.check(req, baseCtx)
+    // Marker is beyond the 100k cap, so it should NOT be detected
+    expect(result.allowed).toBe(true)
+    expect(result.blocked).toBe(false)
+  })
 })

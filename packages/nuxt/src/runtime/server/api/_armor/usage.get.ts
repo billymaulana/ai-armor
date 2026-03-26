@@ -37,8 +37,8 @@ export default defineEventHandler(async (event) => {
   costHistory.sort((a, b) => a.date.localeCompare(b.date))
 
   const budget = {
-    daily: (armor.config.budget as Record<string, unknown> | undefined)?.daily as number ?? 0,
-    monthly: (armor.config.budget as Record<string, unknown> | undefined)?.monthly as number ?? 0,
+    daily: armor.config.budget?.daily ?? 0,
+    monthly: armor.config.budget?.monthly ?? 0,
   }
 
   return {

@@ -68,7 +68,7 @@ const armor = createArmor({
   routing: {
     aliases: {
       fast: 'gpt-4o-mini',
-      smart: 'gpt-4o',
+      balanced: 'gpt-4o',
     },
   },
   logging: {
@@ -98,7 +98,7 @@ async function chat(userId: string, model: string, message: string) {
 
   // 3. Check cache
   const request = { model: finalModel, messages: [{ role: 'user' as const, content: message }] }
-  const cached = armor.getCachedResponse(request)
+  const cached = await armor.getCachedResponse(request)
   if (cached)
     return cached
 
@@ -112,7 +112,7 @@ async function chat(userId: string, model: string, message: string) {
   // 5. Track cost + cache + log
   const usage = response.usage!
   await armor.trackCost(finalModel, usage.prompt_tokens, usage.completion_tokens, userId)
-  armor.setCachedResponse(request, response)
+  await armor.setCachedResponse(request, response)
 
   await armor.log({
     id: crypto.randomUUID(),
@@ -191,7 +191,7 @@ const armor = createArmor({
   budget: { daily: 200, onExceeded: 'block' },
   cache: { enabled: true, strategy: 'exact', ttl: 1800 },
   routing: {
-    aliases: { fast: 'gpt-4o-mini', smart: 'gpt-4o' },
+    aliases: { fast: 'gpt-4o-mini', balanced: 'gpt-4o' },
   },
 })
 

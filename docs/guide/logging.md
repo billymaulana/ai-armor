@@ -40,7 +40,7 @@ const armor = createArmor({
 | `'cached'` | `cached` |
 | `'fallback'` | `fallback` |
 
-The `include` filter controls what fields appear in the filtered log output. The full `ArmorLog` is always stored internally -- `include` only affects the `getFilteredLogs()` output.
+The `include` filter controls which fields are populated in log entries returned by `getLogs()`. Fields not listed in `include` will be omitted or zeroed out in the log entries.
 
 ## ArmorLog Fields
 

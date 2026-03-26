@@ -7,9 +7,14 @@ import type {
   RoutingConfig,
   SafetyConfig,
 } from 'ai-armor'
-import { addImports, addServerHandler, addServerPlugin, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { addImports, addServerHandler, addServerImports, addServerPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { toSerializable } from './utils/serializable'
 
-const logger = useLogger('ai-armor')
+declare module '@nuxt/schema' {
+  interface RuntimeConfig {
+    aiArmor: Record<string, unknown>
+  }
+}
 
 export interface ModuleOptions {
   rateLimit?: RateLimitConfig
@@ -22,43 +27,12 @@ export interface ModuleOptions {
   adminSecret?: string
 }
 
-export function findNonSerializableKeys(obj: unknown, prefix = ''): string[] {
-  const keys: string[] = []
-  if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
-    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
-      const path = prefix ? `${prefix}.${key}` : key
-      if (typeof value === 'function') {
-        keys.push(`${path} (function)`)
-      }
-      else if (value instanceof RegExp) {
-        keys.push(`${path} (RegExp)`)
-      }
-      else if (value && typeof value === 'object') {
-        keys.push(...findNonSerializableKeys(value, path))
-      }
-    }
-  }
-  return keys
-}
-
-export function toSerializable(obj: unknown): Record<string, unknown> {
-  const stripped = findNonSerializableKeys(obj)
-  if (stripped.length > 0) {
-    logger.warn(
-      `Non-serializable config keys stripped from runtimeConfig: ${stripped.join(', ')}. `
-      + 'Use a server plugin with initArmor() for callbacks and StorageAdapter.',
-    )
-  }
-  // JSON round-trip strips functions, RegExps, undefined -- safe for runtimeConfig
-  return JSON.parse(JSON.stringify(obj ?? {}))
-}
-
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: '@ai-armor/nuxt',
     configKey: 'aiArmor',
     compatibility: {
-      nuxt: '>=3.0.0 || >=4.0.0',
+      nuxt: '>=3.0.0',
     },
   },
   defaults: {},
@@ -79,16 +53,24 @@ export default defineNuxtModule<ModuleOptions>({
       { name: 'useArmorSafety', from: resolve('./runtime/composables/useArmorSafety') },
     ])
 
+    // Server utilities auto-import (initArmor, useArmorInstance available via #imports in server context)
+    addServerImports([
+      { name: 'initArmor', from: resolve('./runtime/server/utils/armor') },
+      { name: 'useArmorInstance', from: resolve('./runtime/server/utils/armor') },
+    ])
+
     // Server plugin to initialize armor instance
     addServerPlugin(resolve('./runtime/server/plugins/armor'))
 
     // API routes (only when explicitly enabled or in dev mode)
     addServerHandler({
       route: '/api/_armor/usage',
+      method: 'get',
       handler: resolve('./runtime/server/api/_armor/usage.get'),
     })
     addServerHandler({
       route: '/api/_armor/status',
+      method: 'get',
       handler: resolve('./runtime/server/api/_armor/status.get'),
     })
     addServerHandler({

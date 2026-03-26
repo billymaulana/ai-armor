@@ -2,6 +2,11 @@ import { createError, defineEventHandler, getRequestHeaders, getRequestIP, setRe
 import { useArmorInstance } from '../utils/armor'
 
 export default defineEventHandler(async (event) => {
+  // Skip rate limiting for armor's own API routes to avoid circular dependency
+  if (event.path.startsWith('/api/_armor/')) {
+    return
+  }
+
   const headers = getRequestHeaders(event)
 
   // Use getRequestIP for safer IP extraction (respects Nitro proxy trust config)

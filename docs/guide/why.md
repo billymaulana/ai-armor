@@ -49,7 +49,7 @@ One configuration object. All guardrails active. Works with any AI provider, any
 | Feature | ai-armor | Build from scratch | LiteLLM (Python) |
 |---|---|---|---|
 | Language | TypeScript-native | Your language | Python |
-| Rate limiting | Sliding window, fixed window, token bucket | Must implement | Basic |
+| Rate limiting | Sliding window | Must implement | Basic |
 | Cost tracking | 70+ models, auto pricing | Manual pricing table | Yes |
 | Budget controls | Daily/monthly/per-user + auto downgrade | Must implement | Basic |
 | Response caching | O(1) LRU with TTL | Must implement | Redis required |
