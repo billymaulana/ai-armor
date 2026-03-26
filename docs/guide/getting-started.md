@@ -253,7 +253,7 @@ Dive deeper into each feature:
 
 - [Why ai-armor?](/guide/why) -- The problem and how ai-armor solves it
 - [Rate Limiting](/guide/rate-limiting) -- Sliding window, custom keys, external storage
-- [Cost Tracking](/guide/cost-tracking) -- Budgets, downgrade maps, 70+ models
+- [Cost Tracking](/guide/cost-tracking) -- Budgets, downgrade maps, 69 models
 - [Caching](/guide/caching) -- O(1) LRU cache with TTL
 - [Model Routing](/guide/model-routing) -- Aliases and tier-based routing
 - [Safety](/guide/safety) -- Prompt injection, PII, blocked patterns

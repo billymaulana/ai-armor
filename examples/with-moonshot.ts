@@ -19,7 +19,7 @@ const armor = createArmor({
     onExceeded: 'downgrade-model',
     downgradeMap: { 'kimi-k2.5': 'kimi-k2' },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: { fast: 'kimi-k2', best: 'kimi-k2.5' },
   },

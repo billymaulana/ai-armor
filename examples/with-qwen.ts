@@ -22,7 +22,7 @@ const armor = createArmor({
       'qwen-plus': 'qwen2.5-72b-instruct',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       fast: 'qwen2.5-72b-instruct',

@@ -24,7 +24,7 @@ const armor = createArmor({
       'amazon.nova-lite-v1:0': 'amazon.nova-micro-v1:0',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       'nova-pro': 'amazon.nova-pro-v1:0',

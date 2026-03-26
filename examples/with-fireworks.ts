@@ -21,7 +21,7 @@ const armor = createArmor({
       'accounts/fireworks/models/llama-v3p3-70b-instruct': 'accounts/fireworks/models/qwen3-8b',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 1800, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 1800 },
   routing: {
     aliases: {
       fast: 'accounts/fireworks/models/qwen3-8b',

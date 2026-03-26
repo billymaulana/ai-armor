@@ -12,7 +12,7 @@ features:
       src: /icons/cost.svg
       alt: Cost Tracking
     title: Cost Tracking
-    details: Real-time cost tracking with 70+ model pricing database. Daily, monthly, and per-user budgets with auto-downgrade.
+    details: Real-time cost tracking with 69 model pricing database. Daily, monthly, and per-user budgets with auto-downgrade.
     link: /guide/cost-tracking
   - icon:
       src: /icons/cache.svg

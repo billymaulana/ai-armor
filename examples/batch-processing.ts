@@ -26,7 +26,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 86400, // 24h -- batch results are stable
-    driver: 'memory',
     maxSize: 10000,
   },
   routing: {

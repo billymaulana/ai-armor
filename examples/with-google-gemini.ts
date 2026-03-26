@@ -25,7 +25,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 3600,
-    driver: 'memory',
   },
   routing: {
     aliases: {

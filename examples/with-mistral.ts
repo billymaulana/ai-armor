@@ -20,7 +20,7 @@ const armor = createArmor({
       'codestral-latest': 'mistral-small-latest',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 3600, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 3600 },
   routing: {
     aliases: {
       fast: 'mistral-small-latest',

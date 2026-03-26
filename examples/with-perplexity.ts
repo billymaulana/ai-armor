@@ -19,7 +19,7 @@ const armor = createArmor({
     onExceeded: 'downgrade-model',
     downgradeMap: { 'sonar-pro': 'sonar' },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 300, driver: 'memory' }, // Short TTL for search results
+  cache: { enabled: true, strategy: 'exact', ttl: 300 }, // Short TTL for search results
   routing: {
     aliases: { fast: 'sonar', research: 'sonar-pro' },
   },

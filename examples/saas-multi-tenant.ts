@@ -106,7 +106,6 @@ function createTenantArmor(tenantId: string, tierName: string): ArmorInstance {
       enabled: true,
       strategy: 'exact',
       ttl: tier.tier === 'free' ? 3600 : 1800,
-      driver: 'memory',
       maxSize: tier.tier === 'enterprise' ? 10000 : 1000,
     },
     routing: {

@@ -23,7 +23,7 @@ const armor = createArmor({
       'mixtral-8x7b-32768': 'gemma2-9b-it',
     },
   },
-  cache: { enabled: true, strategy: 'exact', ttl: 1800, driver: 'memory' },
+  cache: { enabled: true, strategy: 'exact', ttl: 1800 },
   routing: {
     aliases: {
       fast: 'gemma2-9b-it',

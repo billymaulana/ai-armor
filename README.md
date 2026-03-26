@@ -83,7 +83,7 @@ That's it. Every AI request through this instance is now rate-limited, budget-co
 | | Feature | What it does |
 |:---:|:---|:---|
 | :shield: | **Rate Limiting** | Sliding-window per-user, per-IP, per-API-key |
-| :moneybag: | **Cost Tracking** | Auto-pricing for 100+ models, daily/monthly/per-user budgets |
+| :moneybag: | **Cost Tracking** | Auto-pricing for 69 models across 17 providers, daily/monthly/per-user budgets |
 | :repeat: | **Fallback Chains** | If OpenAI fails, try Anthropic, then Gemini -- with circuit breaker |
 | :zap: | **Response Caching** | Exact-match + semantic (embedding) cache with LRU eviction |
 | :lock: | **Safety Guardrails** | 26 injection patterns, 6 PII detectors, token limits, custom regex |

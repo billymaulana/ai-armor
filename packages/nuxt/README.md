@@ -86,11 +86,23 @@ Access the armor instance in server routes:
 ```ts
 // server/api/chat.post.ts
 export default defineEventHandler(async (event) => {
-  const armor = useArmor()
-  const result = await armor.invoke('openai:gpt-4o', {
-    messages: [{ role: 'user', content: 'Hello' }],
-  })
-  return result
+  const armor = useArmorInstance()
+  const ctx = { userId: getHeader(event, 'x-user-id') ?? 'anon' }
+
+  const rateLimit = await armor.checkRateLimit(ctx)
+  if (!rateLimit.allowed) {
+    throw createError({ statusCode: 429, message: 'Rate limited' })
+  }
+
+  const model = armor.resolveModel('smart')
+  const budget = await armor.checkBudget(model, ctx)
+  const finalModel = budget.suggestedModel ?? model
+
+  // Call your AI provider, then track cost
+  const response = await callYourAIProvider(finalModel, 'Hello')
+  await armor.trackCost(finalModel, response.inputTokens, response.outputTokens, ctx.userId)
+
+  return { content: response.content, model: finalModel }
 })
 ```
 

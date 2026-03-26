@@ -28,7 +28,6 @@ const armor = createArmor({
     enabled: true,
     strategy: 'exact',
     ttl: 1800,
-    driver: 'memory',
     maxSize: 2000,
   },
   routing: {
